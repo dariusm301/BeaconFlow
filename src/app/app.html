@@ -1,0 +1,20 @@
+<div class="container">
+  <h2>Bluetooth Control Panel</h2>
+  
+  <div class="input-group">
+    
+    <label>UUID:</label>
+    <input type="text" [(ngModel)]="uuid">
+
+    <label>Manufacturer ID (Hex):</label>
+    <input type="text" [(ngModel)]="manufacturerId">
+
+    
+    <button (click)="startBle()" class="btn-start">Start Advertising</button>
+    <button (click)="stopBle()" class="btn-stop">Stop Advertising</button>
+  </div>
+
+  <div class="status-box">
+    <p>{{ statusMessage }}</p>
+  </div>
+</div>

@@ -1,0 +1,33 @@
+.container {
+  display: flex;
+  flex-direction: column; // Aliniere pe verticală
+  gap: 20px;            // Spațiu între titlu și grup
+  padding: 20px;
+  max-width: 400px;
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column; // Pune inputurile și butonul unul sub altul
+  gap: 12px;            // Spațiu egal între elemente
+}
+
+input, button {
+  padding: 10px;
+  font-size: 16px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  width: 100%;          // Se asigură că ocupă toată lățimea containerului
+}
+
+button {
+  background-color: #007bff;
+  color: white;
+  cursor: pointer;
+  border: none;
+  font-weight: bold;
+
+  &:active {
+    background-color: #0056b3;
+  }
+}

@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">beaconflow</string>
+    <string name="title_activity_main">beaconflow</string>
+    <string name="package_name">com.beaconflow.app</string>
+    <string name="custom_url_scheme">com.beaconflow.app</string>
+</resources>
