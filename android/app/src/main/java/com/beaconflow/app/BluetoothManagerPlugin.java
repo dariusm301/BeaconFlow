@@ -74,17 +74,23 @@ public class BluetoothManagerPlugin extends Plugin {
                 .build();
 
         String mIdString = call.getString("manufacturerId");
+        String manufacturerData = call.getString("manufacturerData");
         String uuidString = call.getString("uuid");
+        
         int mId;
+        byte[] manufacturerDataBytes;
         try {
             mId = Integer.parseInt(mIdString, 16);
+            manufacturerDataBytes = manufacturerData.getBytes();
+            
         } catch (NumberFormatException e) {
             mId = 0xFFFF;
+            manufacturerDataBytes = new byte[0];
         }
 
         AdvertiseData data = new AdvertiseData.Builder()
                 .setIncludeDeviceName(false)
-                .addManufacturerData(mId, new byte[0])
+                .addManufacturerData(mId, manufacturerDataBytes)
                 .addServiceUuid(new ParcelUuid(UUID.fromString(uuidString))) 
                 .build();
 
