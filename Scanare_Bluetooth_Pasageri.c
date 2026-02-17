@@ -7,10 +7,14 @@
 #include "esp_bt.h"
 #include "esp_gap_ble_api.h"
 #include "esp_bt_main.h"
+#include "esp_wifi.h"
+#include "esp_mac.h"
+#include "esp_now.h"
 static const uint8_t TARGET_SERVICE_UUID[16] = {
     0x9a, 0xd1, 0x0a, 0xdb, 0x80, 0x45, 0x12, 0xa4, 
     0xec, 0x4b, 0x7d, 0x4f, 0x7a, 0x19, 0x62, 0x80
 };
+uint8_t broadcastAddress[] = {0x3C, 0x61, 0x05, 0x64, 0xFA, 0x0C};
 #define MAX_PASSENGERS 100
 char ticket[20];
 #define PATH_LOSS_INDEX     2.5f    
@@ -21,8 +25,15 @@ bool is_calibrated = false;
 float dynamic_rssi_1m = -59.0f;       
 float calibration_sum = 0.0f;
 float calibration_sq_sum = 0.0f;        
-int calibration_count = 0;            
+int calibration_count = 0;
+esp_now_peer_info_t peerInfo;            
 
+typedef struct struct_message {
+    char checkpoint;
+    char ticket_id[20];
+
+
+} __attribute__((packed)) esp_now_message;
 
 typedef struct {
     float Q;           
@@ -35,12 +46,15 @@ typedef struct {
     KalmanFilter kf;
     uint32_t last_seen;
     bool is_active;
+    bool sent;
 } Passenger;
 
 Passenger passengers[MAX_PASSENGERS];
 
 
 KalmanFilter kf;
+
+esp_now_message Mesaj;
 
 
 void Kalman_Init(KalmanFilter* k, float process_noise, float measurement_noise, float initial_value) {
@@ -102,10 +116,25 @@ static esp_ble_scan_params_t ble_scan_params = {
     .scan_type = BLE_SCAN_TYPE_ACTIVE,
     .own_addr_type = BLE_ADDR_TYPE_PUBLIC,
     .scan_filter_policy = BLE_SCAN_FILTER_ALLOW_ALL,
-    .scan_interval = 0x50, 
-    .scan_window = 0x50,  
+    .scan_interval = 0xA0, 
+    .scan_window = 0xA0,  
     .scan_duplicate = BLE_SCAN_DUPLICATE_DISABLE 
 };
+
+void OnDataSent(const wifi_tx_info_t *txInfo, esp_now_send_status_t status) {
+    printf("Last Packet Send Status: %s\n",
+           status == ESP_NOW_SEND_SUCCESS ? "Delivery Success :)" : "Delivery Fail :(");
+}
+
+void send_espnow_message(Passenger* p) {
+    esp_now_message msg;
+    msg.checkpoint='A';
+    memcpy(msg.ticket_id,p->ticket_id,sizeof(p->ticket_id));
+    p->sent = true;
+    esp_err_t result = esp_now_send(broadcastAddress,(uint8_t *)&msg,sizeof(esp_now_message));
+
+
+}
 
 static void esp_gap_cb(esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param_t *param) {
     
@@ -175,6 +204,10 @@ static void esp_gap_cb(esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param_t *par
         float filtered_rssi = Kalman_Update(&passengers[index].kf, (float)raw_rssi);
         float ratio = (dynamic_rssi_1m - filtered_rssi) / (10.0f * PATH_LOSS_INDEX);
         float dist_m = pow(10.0f, ratio);
+        if(dist_m<2.0f&&passengers[index].sent==false){
+            send_espnow_message(&passengers[index]);
+
+        }
         
         printf("Bilet: %s | RSSI: %d | Distanta: %.2f m\n", passengers[index].ticket_id, raw_rssi, dist_m);
     }
@@ -192,6 +225,18 @@ void app_main(void) {
     }
     ESP_ERROR_CHECK(ret);
     ESP_ERROR_CHECK(esp_bt_controller_mem_release(ESP_BT_MODE_CLASSIC_BT));
+    wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
+    ESP_ERROR_CHECK(esp_wifi_init(&cfg));
+    ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA));
+    ESP_ERROR_CHECK(esp_wifi_start());
+    ESP_ERROR_CHECK(esp_now_init());
+    ESP_ERROR_CHECK(esp_now_register_send_cb(OnDataSent));
+
+    memset(&peerInfo, 0, sizeof(peerInfo));
+    memcpy(peerInfo.peer_addr, broadcastAddress, 6);
+    peerInfo.channel = 0;
+    peerInfo.encrypt = false;
+    esp_now_add_peer(&peerInfo);
 
     Kalman_Init(&kf, PROCESS_NOISE, measurement_noise_R, dynamic_rssi_1m);
     esp_bt_controller_config_t bt_cfg = BT_CONTROLLER_INIT_CONFIG_DEFAULT();
