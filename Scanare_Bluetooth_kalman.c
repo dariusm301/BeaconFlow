@@ -7,9 +7,17 @@
 #include "esp_bt.h"
 #include "esp_gap_ble_api.h"
 #include "esp_bt_main.h"
-#include "esp_bt_device.h"
-static const char *TARGET_DEVICE_NAME = "A53 al utilizatorului Deus";
-#define PATH_LOSS_INDEX     2.8f    
+#include "esp_wifi.h"
+#include "esp_mac.h"
+#include "esp_now.h"
+static const uint8_t TARGET_SERVICE_UUID[16] = {
+    0x9a, 0xd1, 0x0a, 0xdb, 0x80, 0x45, 0x12, 0xa4, 
+    0xec, 0x4b, 0x7d, 0x4f, 0x7a, 0x19, 0x62, 0x80
+};
+uint8_t broadcastAddress[] = {0x3C, 0x61, 0x05, 0x64, 0xFA, 0x0C};
+#define MAX_PASSENGERS 100
+char ticket[20];
+#define PATH_LOSS_INDEX     2.5f    
 #define PROCESS_NOISE       0.015f
 #define CALIBRATION_SAMPLES 100
 float measurement_noise_R = 5.0f;
@@ -17,8 +25,15 @@ bool is_calibrated = false;
 float dynamic_rssi_1m = -59.0f;       
 float calibration_sum = 0.0f;
 float calibration_sq_sum = 0.0f;        
-int calibration_count = 0;            
+int calibration_count = 0;
+esp_now_peer_info_t peerInfo;            
 
+typedef struct struct_message {
+    char checkpoint;
+    char ticket_id[20];
+
+
+} __attribute__((packed)) esp_now_message;
 
 typedef struct {
     float Q;           
@@ -26,9 +41,20 @@ typedef struct {
     float x_est_last;  
     float P_last;      
 } KalmanFilter;
+typedef struct {
+    char ticket_id[20];
+    KalmanFilter kf;
+    uint32_t last_seen;
+    bool is_active;
+    bool sent;
+} Passenger;
+
+Passenger passengers[MAX_PASSENGERS];
 
 
 KalmanFilter kf;
+
+esp_now_message Mesaj;
 
 
 void Kalman_Init(KalmanFilter* k, float process_noise, float measurement_noise, float initial_value) {
@@ -53,9 +79,12 @@ float Kalman_Update(KalmanFilter* k, float raw_val) {
 
 
 
-static bool adv_data_find_name(uint8_t *adv_data, uint8_t adv_data_len, const char *target_name) {
+bool adv_data_find_UUID(uint8_t *adv_data, uint8_t adv_data_len, const uint8_t *TARGET_SERVICE_UUID,char *out_ticket_id) {
     uint8_t *p_data = adv_data;
     uint8_t data_len = adv_data_len;
+    bool uuid_found = false;
+    bool ticket_id_found = false;
+     uint8_t id_len =0;
     while (data_len > 0) {
         uint8_t field_len = *p_data++;
         data_len--;
@@ -63,26 +92,49 @@ static bool adv_data_find_name(uint8_t *adv_data, uint8_t adv_data_len, const ch
         uint8_t field_type = *p_data++;
         data_len--;
         
-        if (field_type == 0x09 || field_type == 0x08) { 
-            uint8_t name_len = field_len - 1;
-            if (name_len == strlen(target_name) && memcmp(p_data, target_name, name_len) == 0) {
-                return true;
+        if (field_type == 0x06 || field_type == 0x07) { 
+            uint8_t uuid_len = field_len - 1;
+            if (uuid_len ==16 && memcmp(p_data, TARGET_SERVICE_UUID,16) == 0) {
+                uuid_found=true;
             }
+        }
+        else if(field_type==0xFF){
+            if(field_len>3)
+            id_len = field_len - 3;
+            memcpy(out_ticket_id, p_data + 2, id_len);
+            out_ticket_id[id_len] = '\0';
+            ticket_id_found = true;
+
         }
         p_data += (field_len - 1);
         data_len -= (field_len - 1);
     }
-    return false;
+    return (uuid_found && ticket_id_found);
 }
 
 static esp_ble_scan_params_t ble_scan_params = {
     .scan_type = BLE_SCAN_TYPE_ACTIVE,
     .own_addr_type = BLE_ADDR_TYPE_PUBLIC,
     .scan_filter_policy = BLE_SCAN_FILTER_ALLOW_ALL,
-    .scan_interval = 0x50, 
-    .scan_window = 0x50,  
+    .scan_interval = 0xA0, 
+    .scan_window = 0xA0,  
     .scan_duplicate = BLE_SCAN_DUPLICATE_DISABLE 
 };
+
+void OnDataSent(const wifi_tx_info_t *txInfo, esp_now_send_status_t status) {
+    printf("Last Packet Send Status: %s\n",
+           status == ESP_NOW_SEND_SUCCESS ? "Delivery Success :)" : "Delivery Fail :(");
+}
+
+void send_espnow_message(Passenger* p) {
+    esp_now_message msg;
+    msg.checkpoint='A';
+    memcpy(msg.ticket_id,p->ticket_id,sizeof(p->ticket_id));
+    p->sent = true;
+    esp_err_t result = esp_now_send(broadcastAddress,(uint8_t *)&msg,sizeof(esp_now_message));
+
+
+}
 
 static void esp_gap_cb(esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param_t *param) {
     
@@ -97,10 +149,11 @@ static void esp_gap_cb(esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param_t *par
         
         if (scan->scan_rst.search_evt == ESP_GAP_SEARCH_INQ_RES_EVT) {
             
-            
-            if (adv_data_find_name(scan->scan_rst.ble_adv, scan->scan_rst.adv_data_len, TARGET_DEVICE_NAME)) {
+            char current_ticket[20];
+            if (adv_data_find_UUID(scan->scan_rst.ble_adv, scan->scan_rst.adv_data_len, TARGET_SERVICE_UUID,current_ticket)) {
     
     int raw_rssi = scan->scan_rst.rssi;
+    int index=-1;
     
     if (!is_calibrated) {
         calibration_sum += raw_rssi;
@@ -128,16 +181,41 @@ static void esp_gap_cb(esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param_t *par
         }
     } 
     else {
-        float filtered_rssi = Kalman_Update(&kf, (float)raw_rssi);
+        for (int i = 0; i < MAX_PASSENGERS; i++) {
+        if (passengers[i].is_active && strcmp(passengers[i].ticket_id, current_ticket) == 0) {
+            index = i;
+            break;
+        }
+    }
+
+    if (index == -1) {
+        for (int i = 0; i < MAX_PASSENGERS; i++) {
+            if (!passengers[i].is_active) {
+                index = i;
+                strcpy(passengers[index].ticket_id, current_ticket);
+                Kalman_Init(&passengers[index].kf, PROCESS_NOISE, measurement_noise_R, (float)raw_rssi);
+                passengers[index].is_active = true;
+                break;
+            }
+        }
+    }
+
+    if (index != -1) {
+        float filtered_rssi = Kalman_Update(&passengers[index].kf, (float)raw_rssi);
         float ratio = (dynamic_rssi_1m - filtered_rssi) / (10.0f * PATH_LOSS_INDEX);
         float dist_m = pow(10.0f, ratio);
+        if(dist_m<2.0f&&passengers[index].sent==false){
+            send_espnow_message(&passengers[index]);
+
+        }
         
-        printf("%d, %.2f, %.2f\n", raw_rssi, filtered_rssi, dist_m);
+        printf("Bilet: %s | RSSI: %d | Distanta: %.2f m\n", passengers[index].ticket_id, raw_rssi, dist_m);
+    }
+}
     }
 }
 }
     }
-}
 
 void app_main(void) {
     esp_err_t ret = nvs_flash_init();
@@ -146,6 +224,19 @@ void app_main(void) {
         ret = nvs_flash_init();
     }
     ESP_ERROR_CHECK(ret);
+    ESP_ERROR_CHECK(esp_bt_controller_mem_release(ESP_BT_MODE_CLASSIC_BT));
+    wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
+    ESP_ERROR_CHECK(esp_wifi_init(&cfg));
+    ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA));
+    ESP_ERROR_CHECK(esp_wifi_start());
+    ESP_ERROR_CHECK(esp_now_init());
+    ESP_ERROR_CHECK(esp_now_register_send_cb(OnDataSent));
+
+    memset(&peerInfo, 0, sizeof(peerInfo));
+    memcpy(peerInfo.peer_addr, broadcastAddress, 6);
+    peerInfo.channel = 0;
+    peerInfo.encrypt = false;
+    esp_now_add_peer(&peerInfo);
 
     Kalman_Init(&kf, PROCESS_NOISE, measurement_noise_R, dynamic_rssi_1m);
     esp_bt_controller_config_t bt_cfg = BT_CONTROLLER_INIT_CONFIG_DEFAULT();
