@@ -34,4 +34,14 @@
 
 /* @import "@ionic/angular/css/palettes/dark.always.css"; */
 /* @import "@ionic/angular/css/palettes/dark.class.css"; */
-@import '@ionic/angular/css/palettes/dark.system.css';
+/* @import '@ionic/angular/css/palettes/dark.system.css'; */
+
+/* Force light mode */
+:root {
+  --ion-background-color: #ffffff;
+  --ion-text-color: #000000;
+}
+
+ion-app {
+  --ion-background-color: #ffffff;
+}

@@ -1,0 +1,42 @@
+<ion-content class="onboarding">
+  <div class="onboarding-container">
+    <div class="logo-section">
+      <div class="logo-circle">
+        <ion-icon name="airplane"></ion-icon>
+      </div>
+      <h1>BeaconFlow</h1>
+      <p class="subtitle">Your trip, our stress</p>
+    </div>
+
+    <div class="qr-section">
+      <div class="qr-placeholder">
+        <div class="qr-frame">
+          <div class="qr-corners">
+            <div class="corner top-left"></div>
+            <div class="corner top-right"></div>
+            <div class="corner bottom-left"></div>
+            <div class="corner bottom-right"></div>
+          </div>
+          <ion-icon name="qr-code" class="qr-icon"></ion-icon>
+        </div>
+      </div>
+
+      <h2>Scanează Biletul de Îmbarcare</h2>
+      <p class="description">
+        Poziționează codul QR de pe biletul tău de îmbarcare în cadru pentru a începe monitorizarea în timp real
+      </p>
+    </div>
+
+    <div class="actions">
+      <ion-button expand="block" size="large" (click)="simulateScan()">
+        <ion-icon slot="start" name="scan"></ion-icon>
+        Scan it now
+      </ion-button>
+
+      <ion-button expand="block"  size="small">
+        Manually enter details
+      </ion-button>
+    </div>
+
+  </div>
+</ion-content>

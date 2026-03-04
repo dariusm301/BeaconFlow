@@ -1,3 +1,24 @@
 <ion-app>
   <ion-router-outlet></ion-router-outlet>
+
+  <ion-tab-bar slot="bottom" *ngIf="showTabs">
+    <ion-tab-button (click)="navigateTo('dashboard')" [class.tab-selected]="currentRoute === 'dashboard'">
+      <ion-icon [name]="currentRoute === 'dashboard' ? 'home' : 'home-outline'"></ion-icon>
+      <ion-label>Acasă</ion-label>
+    </ion-tab-button>
+
+    <ion-tab-button (click)="navigateTo('queues')" [class.tab-selected]="currentRoute === 'queues'">
+      <ion-icon [name]="currentRoute === 'queues' ? 'people' : 'people-outline'"></ion-icon>
+      <ion-label>Cozi</ion-label>
+    </ion-tab-button>
+
+    <ion-tab-button (click)="navigateTo('baggage')" [class.tab-selected]="currentRoute === 'baggage'">
+      <ion-icon [name]="currentRoute === 'baggage' ? 'compass' : 'compass-outline'"></ion-icon>
+      <ion-label>Facilități</ion-label>
+    </ion-tab-button>
+    <ion-tab-button (click)="navigateTo('onboarding')" [class.tab-selected-exit]="currentRoute === 'onboarding'">
+      <ion-icon name="exit-outline"></ion-icon>
+      <ion-label>Exit</ion-label>
+    </ion-tab-button>
+  </ion-tab-bar>
 </ion-app>
