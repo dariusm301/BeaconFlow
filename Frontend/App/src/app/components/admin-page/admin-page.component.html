@@ -161,21 +161,17 @@
           </div>
         </div>
 
-        <!--                <div class="device-footer">-->
-        <!--                  <button class="footer-btn checkpoint-btn" (click)="toggleCheckpointType(device)">-->
-        <!--                    <ion-icon [name]="device.checkpointType === 'IN' ? 'exit-outline' : 'enter-outline'"></ion-icon>-->
-        <!--                    <span>Switch to {{ device.checkpointType === 'IN' ? 'OUT' : 'IN' }}</span>-->
-        <!--                  </button>-->
-        <!--                  <button-->
-        <!--                    class="footer-btn calibrate-btn"-->
-        <!--                    [class.calibrating]="device.isCalibrating"-->
-        <!--                    [disabled]="device.isCalibrating"-->
-        <!--                    (click)="startCalibration(device)"-->
-        <!--                  >-->
-        <!--        &lt;!&ndash;            <ion-icon name="refresh-outline" [class.spinning]="device.isCalibrating"></ion-icon>&ndash;&gt;-->
-        <!--        &lt;!&ndash;            <span>{{ device.isCalibrating ? 'Calibrating...' : 'Calibrate' }}</span>&ndash;&gt;-->
-        <!--                  </button>-->
-        <!--                </div>-->
+                        <div class="device-footer">
+                          <button (click)="calibrateDevice(device)"
+                            class="footer-btn calibrate-btn"
+                            [class.calibrating]="device.calibrated"
+                            [disabled]="device.calibrated"
+
+                          >
+                            <ion-icon name="refresh-outline" ></ion-icon>
+                            <span>{{ device.calibrated ? 'Calibrated' : 'Calibrate' }}</span>
+                          </button >
+                        </div>
       </div>
     </div>
 

@@ -1,9 +1,9 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
-import { IonContent, IonIcon, IonButton, IonSpinner } from '@ionic/angular/standalone';
-import { addIcons } from 'ionicons';
+import {Component, OnInit, ChangeDetectorRef} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {FormsModule} from '@angular/forms';
+import {Router} from '@angular/router';
+import {IonContent, IonIcon, IonButton, IonSpinner} from '@ionic/angular/standalone';
+import {addIcons} from 'ionicons';
 import {
   addOutline,
   arrowBackOutline,
@@ -23,9 +23,9 @@ import {
   hardwareChipOutline,
   syncOutline
 } from 'ionicons/icons';
-import { forkJoin } from 'rxjs';
-import {ESP,MainESP} from '../models/esp-device.model';
-import { EspDeviceService } from '../services/esp-device.service';
+import {forkJoin} from 'rxjs';
+import {ESP, MainESP} from '../models/esp-device.model';
+import {EspDeviceService} from '../services/esp-device.service';
 import {HeadboardComponent} from "../headbar/headboard.component";
 
 @Component({
@@ -48,18 +48,17 @@ export class AdminPageComponent implements OnInit {
     checkpoint: '',
     gate: '',
     uuid: '',
-    calibrated : false,
+    calibrated: false,
     battery: "100"
   };
 
-  mainESP : MainESP | null = null;
+  mainESP: MainESP | null = null;
   oldCheck: string = '';
   oldGate: number = 0;
 
   constructor(
     private router: Router,
     private espService: EspDeviceService,
-
     private cdr: ChangeDetectorRef
   ) {
     addIcons({
@@ -94,12 +93,17 @@ export class AdminPageComponent implements OnInit {
         this.mainESP = result.mainESP;
         let devices: any = result.devices;
         if (typeof devices === 'string') {
-          try { devices = JSON.parse(devices); } catch (e) { /* ignore */ }
+          try {
+            devices = JSON.parse(devices);
+          } catch (e) { /* ignore */
+          }
         }
         this.devices = Array.isArray(devices) ? [...devices] : [];
         this.isLoading = false;
         this.cdr.detectChanges();
-        setTimeout(() => { this.cdr.detectChanges(); }, 100);
+        setTimeout(() => {
+          this.cdr.detectChanges();
+        }, 100);
       },
       error: (error) => {
         console.error('Failed to load data:', error);
@@ -115,12 +119,17 @@ export class AdminPageComponent implements OnInit {
       next: (rawDevices) => {
         let devices: any = rawDevices;
         if (typeof devices === 'string') {
-          try { devices = JSON.parse(devices); } catch (e) { /* ignore */ }
+          try {
+            devices = JSON.parse(devices);
+          } catch (e) { /* ignore */
+          }
         }
         this.devices = Array.isArray(devices) ? [...devices] : [];
         this.isLoading = false;
         this.cdr.detectChanges();
-        setTimeout(() => { this.cdr.detectChanges(); }, 100);
+        setTimeout(() => {
+          this.cdr.detectChanges();
+        }, 100);
       },
       error: (error) => {
         console.error('Failed to load devices:', error);
@@ -129,7 +138,6 @@ export class AdminPageComponent implements OnInit {
       }
     });
   }
-
 
 
   openAddForm(): void {
@@ -159,16 +167,18 @@ export class AdminPageComponent implements OnInit {
     this.editingDevice = null;
     this.resetForm();
   }
+
   //
   resetForm(): void {
     this.formData = {
-     checkpoint: '',
+      checkpoint: '',
       gate: '',
       uuid: '',
       calibrated: false,
       battery: "0"
     };
   }
+
   addDevice(): void {
     if (this.validateForm()) {
       const newDevice: ESP = {
@@ -178,15 +188,19 @@ export class AdminPageComponent implements OnInit {
         calibrated: false,
         battery: "100"
       };
-      const apiData = { ...this.formData };
+      const apiData = {...this.formData};
 
       this.devices = [...this.devices, newDevice];
       this.closeForm();
       this.cdr.detectChanges();
-      setTimeout(() => { this.cdr.detectChanges(); }, 50);
+      setTimeout(() => {
+        this.cdr.detectChanges();
+      }, 50);
 
       this.espService.addDevice(apiData).subscribe({
-        error: (error) => { console.error('Failed to add device:', error) }
+        error: (error) => {
+          console.error('Failed to add device:', error)
+        }
       });
     }
   }
@@ -200,7 +214,7 @@ export class AdminPageComponent implements OnInit {
         calibrated: this.formData.calibrated,
         battery: this.formData.battery
       };
-      const apiData = { ...this.formData };
+      const apiData = {...this.formData};
 
       // Use editingDevice reference directly — guaranteed to be the right one
       const idx = this.devices.indexOf(this.editingDevice);
@@ -214,10 +228,14 @@ export class AdminPageComponent implements OnInit {
       this.oldCheck = '';
       this.closeForm();
       this.cdr.detectChanges();
-      setTimeout(() => { this.cdr.detectChanges(); }, 50);
+      setTimeout(() => {
+        this.cdr.detectChanges();
+      }, 50);
 
       this.espService.editDevice(savedOldCheck, savedOldGate, apiData).subscribe({
-        error: (error) => { console.error('Failed to update device:', error) }
+        error: (error) => {
+          console.error('Failed to update device:', error)
+        }
       });
     }
   }
@@ -226,10 +244,14 @@ export class AdminPageComponent implements OnInit {
     if (confirm(`Are you sure you want to delete "${device.checkpoint}"?`)) {
       this.devices = this.devices.filter(d => d !== device);
       this.cdr.detectChanges();
-      setTimeout(() => { this.cdr.detectChanges(); }, 50);
+      setTimeout(() => {
+        this.cdr.detectChanges();
+      }, 50);
 
       this.espService.deleteDevice(device.checkpoint, parseInt(device.gate)).subscribe({
-        error: (error) => { console.error('Failed to delete device:', error) }
+        error: (error) => {
+          console.error('Failed to delete device:', error)
+        }
       });
     }
   }
@@ -245,25 +267,21 @@ export class AdminPageComponent implements OnInit {
     }
     return true;
   }
+
   //
   generateUUID(): void {
-    const uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-      const r = Math.random() * 16 | 0;
-      const v = c === 'x' ? r : (r & 0x3 | 0x8);
-      return v.toString(16);
-    });
-    this.formData.uuid = uuid.toUpperCase();
+    this.formData.uuid = "8062197a-4f7d-4bec-a412-4580db0ad19a";
   }
 
   getStatusColor(calibrated: boolean): string {
-    if(calibrated) {
+    if (calibrated) {
       return '#4CAF50';
     }
     return '#F44336';
   }
 
   getStatusText(calibrated: boolean): string {
-    if(calibrated) {
+    if (calibrated) {
       return 'Online';
     }
     return 'Offline';
@@ -275,6 +293,18 @@ export class AdminPageComponent implements OnInit {
 
   getOnlineCount(): number {
     return this.devices.filter(d => d.calibrated).length;
+  }
+  calibrateDevice(device: ESP): void {
+    this.devices = this.devices.map (d => {
+      if (d === device) {
+        return {...d, calibrated: true};
+      }
+      return d;
+    });
+    this.cdr.detectChanges();
+    setTimeout(() => {
+      this.cdr.detectChanges();
+    }, 50);
   }
 
 }

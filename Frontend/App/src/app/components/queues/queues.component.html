@@ -1,7 +1,7 @@
 <app-headboard></app-headboard>
 <ion-content class="queues">
   <div class="header">
-    <h1>Queues Monitor</h1>
+    <h1>Checkpoints Monitor</h1>
     <p class="subtitle">Real time information</p>
   </div>
 
@@ -60,8 +60,8 @@
                 <ion-icon name="airplane"></ion-icon>
               </div>
             </div>
-            <div class="stop-label">Gate A12</div>
-            <div class="stop-time warning-text">~18 min</div>
+            <div class="stop-label">Gate {{ ticket?.gate }}</div>
+            <div class="stop-time warning-text">~{{ wait?.waiting_time?.estimated_wait_minutes }} min</div>
           </div>
         </div>
       </div>
@@ -151,18 +151,18 @@
         <div class="queue-header">
           <div class="queue-title">
             <ion-icon name="airplane"></ion-icon>
-            <h3>Gate A12</h3>
+            <h3>Gate {{ ticket?.gate }}</h3>
           </div>
           <div class="queue-badge warning">Moderate</div>
         </div>
 
         <div class="queue-stats">
           <div class="stat">
-            <span class="stat-value">~18</span>
+            <span class="stat-value">~{{wait?.waiting_time?.estimated_wait_minutes}} </span>
             <span class="stat-label">minutes</span>
           </div>
           <div class="stat">
-            <span class="stat-value">42</span>
+            <span class="stat-value">{{ wait?.queue_length }}</span>
             <span class="stat-label">people</span>
           </div>
           <div class="stat">

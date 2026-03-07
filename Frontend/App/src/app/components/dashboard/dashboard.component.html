@@ -6,12 +6,13 @@
       <h1>Welcome to Bflow! 👋</h1>
     </div>
 
-    <div class="flight-card">
+    <!-- Flight card - only when ticket exists -->
+    <div class="flight-card" *ngIf="ticket">
       <div class="flight-header">
         <div class="flight-route">
           <div class="airport">
-            <span class="code">OTP</span>
-            <span class="city">Bucharest</span>
+            <span class="code">{{ getAirportCode(ticket.departure_airport) }}</span>
+            <span class="city">{{ ticket.departure_airport | titlecase }}</span>
           </div>
           <div class="flight-path">
             <div class="line"></div>
@@ -19,8 +20,8 @@
             <div class="line"></div>
           </div>
           <div class="airport">
-            <span class="code">LHR</span>
-            <span class="city">London</span>
+            <span class="code">{{ getAirportCode(ticket.arrival_airport) }}</span>
+            <span class="city">{{ ticket.arrival_airport | titlecase }}</span>
           </div>
         </div>
       </div>
@@ -37,24 +38,31 @@
           <ion-icon name="time-outline"></ion-icon>
           <div>
             <span class="label">Departure</span>
-            <span class="value">14:30</span>
+            <span class="value">{{ ticket.departure_time }}</span>
           </div>
         </div>
         <div class="detail">
           <ion-icon name="pricetag-outline"></ion-icon>
           <div>
             <span class="label">Flight</span>
-            <span class="value">BA 2025</span>
+            <span class="value">{{ ticket.flight_number }}</span>
           </div>
         </div>
         <div class="detail">
           <ion-icon name="location-outline"></ion-icon>
           <div>
             <span class="label">Gate</span>
-            <span class="value">A12</span>
+            <span class="value">{{ ticket.gate }}</span>
           </div>
         </div>
       </div>
+    </div>
+
+    <!-- No ticket fallback -->
+    <div class="flight-card" *ngIf="!ticket" style="text-align: center; padding: 40px 20px;">
+      <ion-icon name="airplane" style="font-size: 48px; color: #0066cc; margin-bottom: 12px;"></ion-icon>
+      <h3 style="margin: 0 0 8px; font-size: 18px; font-weight: 600;">No Boarding Pass</h3>
+      <p style="margin: 0; color: #8e8e93; font-size: 14px;">Scan your boarding pass to see flight details</p>
     </div>
 
     <div class="status-section">
@@ -80,7 +88,7 @@
         </div>
         <div class="status-content">
           <h3>Boarding Gate</h3>
-          <p class="time">~18 minutes wait</p>
+          <p class="time">~{{ wait?.waiting_time?.estimated_wait_minutes }} minutes wait</p>
           <div class="status-bar">
             <div class="status-fill" style="width: 65%"></div>
           </div>
