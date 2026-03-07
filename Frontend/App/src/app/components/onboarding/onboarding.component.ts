@@ -3,8 +3,8 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import {IonContent, IonIcon, IonButton, IonSpinner} from '@ionic/angular/standalone';
 import {Onboarding} from "../services/onboarding";
-import {HeadboardComponent} from "../headbar/headboard.component";
 import {Camera, CameraResultType, CameraSource} from "@capacitor/camera";
+import {BleBeaconService} from "../services/ble-beacon.service";
 
 
 @Component({
@@ -15,16 +15,17 @@ import {Camera, CameraResultType, CameraSource} from "@capacitor/camera";
   styleUrls: ['./onboarding.component.scss']
 })
 export class OnboardingComponent {
-  constructor(private router: Router, private service: Onboarding, private cdr: ChangeDetectorRef) {}
+  constructor(
+    private router: Router,
+    private service: Onboarding,
+    private cdr: ChangeDetectorRef,
+    private bleBeacon: BleBeaconService
+  ) {}
 
   @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
 
-  state= "default"; // default or loading
-  debugLog: string = '';
-
-  selectedFile : File | null = null;
-
-
+  state = 'default'; // 'default' or 'loading'
+  selectedFile: File | null = null;
 
   simulateScan() {
     this.router.navigate(['/dashboard']);
@@ -34,31 +35,29 @@ export class OnboardingComponent {
     this.router.navigate(['/admin-login']);
   }
 
-  loadFile() : void  {
-
+  loadFile(): void {
     this.fileInput.nativeElement.click();
-
   }
 
   handleFileChange() {
     const file = this.fileInput.nativeElement.files?.[0];
     if (file) {
-      this.debugLog = 'File selected: ' + file.name + ' (' + file.size + ' bytes)';
-      this.state = "loading";
-      this.cdr.detectChanges();
-
-      this.debugLog += ' | Calling uploadTicket...';
+      this.state = 'loading';
       this.cdr.detectChanges();
 
       this.service.uploadTicket(file).subscribe({
         next: (response) => {
-          this.debugLog += ' | SUCCESS: ' + JSON.stringify(response).substring(0, 100);
           this.cdr.detectChanges();
+          const ticketId = response?.ticket_id || response?.id || '';
+          if (!ticketId) {
+            console.warn('No ticket ID in upload response, BLE beacon will advertise service UUID only');
+          }
+          this.bleBeacon.startBeacon(ticketId);
           this.router.navigate(['/dashboard']);
         },
         error: (error) => {
-          this.debugLog += ' | ERROR: ' + (error?.message || JSON.stringify(error).substring(0, 100));
-          this.state = "default";
+          console.error('Ticket upload failed:', error);
+          this.state = 'default';
           this.selectedFile = null;
           this.cdr.detectChanges();
         }
@@ -68,9 +67,6 @@ export class OnboardingComponent {
 
   async takePhoto() {
     try {
-      this.debugLog = 'Opening camera...';
-      this.cdr.detectChanges();
-
       const image = await Camera.getPhoto({
         quality: 90,
         allowEditing: false,
@@ -79,35 +75,37 @@ export class OnboardingComponent {
       });
 
       if (image.webPath) {
-        this.debugLog += ' | Photo taken, converting...';
-        this.state = "loading";
+        this.state = 'loading';
         this.cdr.detectChanges();
 
         const blob = await this.base64FromPath(image.webPath);
         const file = new File([blob], `photo_${Date.now()}.jpg`, { type: 'image/jpeg' });
 
-        this.debugLog += ' | File created: ' + file.size + ' bytes | Uploading...';
-        this.cdr.detectChanges();
-
         this.service.uploadTicket(file).subscribe({
           next: (response) => {
-            this.debugLog += ' | SUCCESS: ' + JSON.stringify(response).substring(0, 100);
             this.cdr.detectChanges();
+            const ticketId = response?.ticket_id || response?.id || '';
+            if (!ticketId) {
+              console.warn('No ticket ID in upload response, BLE beacon will advertise service UUID only');
+            }
+            this.bleBeacon.startBeacon(ticketId);
             this.router.navigate(['/dashboard']);
           },
           error: (error) => {
-            this.debugLog += ' | ERROR: ' + (error?.message || JSON.stringify(error).substring(0, 100));
-            this.state = "default";
+            console.error('Ticket upload failed:', error);
+            this.state = 'default';
             this.cdr.detectChanges();
           }
         });
       }
-
     } catch (error: any) {
-      this.debugLog += ' | CAMERA ERROR: ' + (error?.message || error);
+      console.error('Camera error:', error);
+      this.state = 'default';
+      this.selectedFile = null;
       this.cdr.detectChanges();
     }
   }
+
   private async base64FromPath(path: string): Promise<Blob> {
     const response = await fetch(path);
     return await response.blob();
