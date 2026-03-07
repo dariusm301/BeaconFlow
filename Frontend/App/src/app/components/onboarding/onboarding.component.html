@@ -1,5 +1,10 @@
 <ion-content class="onboarding">
   <div class="onboarding-container">
+    <div class="admin-settings">
+      <div class="admin-icon" (click)="goToAdminLogin()">
+        <ion-icon name="settings"></ion-icon>
+      </div>
+    </div>
     <div class="logo-section">
       <div class="logo-circle">
         <ion-icon name="airplane"></ion-icon>
@@ -21,21 +26,34 @@
         </div>
       </div>
 
-      <h2>Scanează Biletul de Îmbarcare</h2>
+      <h2>Scan Boarding Pass</h2>
       <p class="description">
-        Poziționează codul QR de pe biletul tău de îmbarcare în cadru pentru a începe monitorizarea în timp real
+        Position your boarding pass QR code in the frame to start real-time monitoring
       </p>
     </div>
 
     <div class="actions">
-      <ion-button expand="block" size="large" (click)="simulateScan()">
-        <ion-icon slot="start" name="scan"></ion-icon>
-        Scan it now
+<!--      <ion-button expand="block" size="large" (click)="loadFile()">-->
+<!--        <div *ngIf="state == 'default'" class="loader">-->
+<!--        <ion-icon slot="start" name="scan"></ion-icon>-->
+<!--        <p>Scan now-->
+<!--      </div>-->
+<!--        <div *ngIf="state == 'loading'" class="loader">-->
+<!--          <p>Loading</p>-->
+<!--          <ion-spinner name="lines"></ion-spinner>-->
+<!--        </div>-->
+<!--      </ion-button>-->
+      <ion-button expand="block" size="large" (click)="takePhoto()">
+        <div *ngIf="state == 'default'" class="loader">
+          <ion-icon slot="start" name="scan"></ion-icon>
+          <p>Scan now
+        </div>
+        <div *ngIf="state == 'loading'" class="loader">
+          <p>Loading</p>
+          <ion-spinner name="lines"></ion-spinner>
+        </div>
       </ion-button>
-
-      <ion-button expand="block"  size="small">
-        Manually enter details
-      </ion-button>
+      <input #fileInput type="file" accept=".pdf,.png,.jpeg " (change)="handleFileChange()" class="inputDesign">
     </div>
 
   </div>

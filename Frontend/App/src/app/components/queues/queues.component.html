@@ -1,71 +1,97 @@
+<app-headboard></app-headboard>
 <ion-content class="queues">
   <div class="header">
-    <h1>Monitorizare Cozi</h1>
-    <p class="subtitle">Informații în timp real</p>
+    <h1>Queues Monitor</h1>
+    <p class="subtitle">Real time information</p>
   </div>
 
   <div class="queues-container">
-    <div class="map-section">
-      <div class="map-container">
-        <div class="map-overlay">
-          <div class="terminal-label">Terminal 1</div>
+    <!-- Journey Route - Horizontal -->
+    <div class="journey-section">
+      <div class="journey-card">
+        <div class="journey-header">
+          <span class="journey-title">Your Route</span>
+          <span class="journey-total">~31 min total</span>
+        </div>
 
-          <div class="checkpoint security" style="top: 30%; left: 20%;">
-            <div class="checkpoint-pulse"></div>
-            <div class="checkpoint-icon">
-              <ion-icon name="shield-checkmark"></ion-icon>
+        <div class="journey-route">
+          <!-- You are here -->
+          <div class="route-stop current">
+            <div class="stop-top">
+              <div class="stop-dot current-dot">
+                <div class="pulse-ring"></div>
+              </div>
             </div>
-            <span class="checkpoint-label">Securitate</span>
-            <span class="checkpoint-time good">8 min</span>
+            <div class="stop-label">You</div>
           </div>
 
-          <div class="checkpoint passport" style="top: 50%; left: 50%;">
-            <div class="checkpoint-pulse"></div>
-            <div class="checkpoint-icon">
-              <ion-icon name="newspaper"></ion-icon>
+          <div class="route-line good-line"></div>
+
+          <!-- Security -->
+          <div class="route-stop">
+            <div class="stop-top">
+              <div class="stop-dot good-dot">
+                <ion-icon name="shield-checkmark"></ion-icon>
+              </div>
             </div>
-            <span class="checkpoint-label">Pașapoarte</span>
-            <span class="checkpoint-time good">5 min</span>
+            <div class="stop-label">Security</div>
+            <div class="stop-time good-text">~8 min</div>
           </div>
 
-          <div class="checkpoint gate" style="top: 70%; left: 75%;">
-            <div class="checkpoint-pulse warning"></div>
-            <div class="checkpoint-icon warning">
-              <ion-icon name="airplane"></ion-icon>
+          <div class="route-line good-line"></div>
+
+          <!-- Passport -->
+          <div class="route-stop">
+            <div class="stop-top">
+              <div class="stop-dot good-dot">
+                <ion-icon name="newspaper"></ion-icon>
+              </div>
             </div>
-            <span class="checkpoint-label">Poartă A12</span>
-            <span class="checkpoint-time warning">18 min</span>
+            <div class="stop-label">Passport</div>
+            <div class="stop-time good-text">~5 min</div>
           </div>
 
-          <div class="path-line"></div>
+          <div class="route-line warning-line"></div>
+
+          <!-- Gate -->
+          <div class="route-stop">
+            <div class="stop-top">
+              <div class="stop-dot warning-dot">
+                <ion-icon name="airplane"></ion-icon>
+              </div>
+            </div>
+            <div class="stop-label">Gate A12</div>
+            <div class="stop-time warning-text">~18 min</div>
+          </div>
         </div>
       </div>
     </div>
 
+    <!-- Checkpoint Details -->
     <div class="details-section">
-      <h2>Detalii Puncte de Control</h2>
+      <h2>Checkpoint Details</h2>
 
       <div class="queue-card good">
         <div class="queue-header">
           <div class="queue-title">
             <ion-icon name="shield-checkmark"></ion-icon>
-            <h3>Control Securitate</h3>
+            <h3>Security Control</h3>
           </div>
-          <div class="queue-badge good">Liber</div>
+          <div class="queue-badge good">Clear</div>
         </div>
 
         <div class="queue-stats">
           <div class="stat">
             <span class="stat-value">~8</span>
-            <span class="stat-label">minute</span>
+            <span class="stat-label">minutes</span>
           </div>
           <div class="stat">
             <span class="stat-value">15</span>
-            <span class="stat-label">persoane</span>
+            <span class="stat-label">people</span>
           </div>
           <div class="stat">
             <span class="stat-value">3</span>
-            <span class="stat-label">linii active</span>
+            <span class="stat-label">active lines</span>
           </div>
         </div>
 
@@ -79,69 +105,32 @@
 
         <p class="queue-tip">
           <ion-icon name="bulb"></ion-icon>
-          Cel mai bun moment să treci prin securitate
+          Best time to go through security
         </p>
       </div>
 
-      <div class="queue-card warning">
-        <div class="queue-header">
-          <div class="queue-title">
-            <ion-icon name="airplane"></ion-icon>
-            <h3>Poartă A12</h3>
-          </div>
-          <div class="queue-badge warning">Moderat</div>
-        </div>
-
-        <div class="queue-stats">
-          <div class="stat">
-            <span class="stat-value">~18</span>
-            <span class="stat-label">minute</span>
-          </div>
-          <div class="stat">
-            <span class="stat-value">42</span>
-            <span class="stat-label">persoane</span>
-          </div>
-          <div class="stat">
-            <span class="stat-value">2</span>
-            <span class="stat-label">linii active</span>
-          </div>
-        </div>
-
-        <div class="queue-chart">
-          <div class="chart-bar" style="height: 60%"></div>
-          <div class="chart-bar" style="height: 70%"></div>
-          <div class="chart-bar" style="height: 75%"></div>
-          <div class="chart-bar active" style="height: 65%"></div>
-          <div class="chart-bar" style="height: 55%"></div>
-        </div>
-
-        <p class="queue-tip">
-          <ion-icon name="cafe"></ion-icon>
-          Ai timp pentru o cafea rapidă
-        </p>
-      </div>
 
       <div class="queue-card good">
         <div class="queue-header">
           <div class="queue-title">
             <ion-icon name="newspaper"></ion-icon>
-            <h3>Control Pașapoarte</h3>
+            <h3>Passport Control</h3>
           </div>
-          <div class="queue-badge good">Liber</div>
+          <div class="queue-badge good">Clear</div>
         </div>
 
         <div class="queue-stats">
           <div class="stat">
             <span class="stat-value">~5</span>
-            <span class="stat-label">minute</span>
+            <span class="stat-label">minutes</span>
           </div>
           <div class="stat">
             <span class="stat-value">8</span>
-            <span class="stat-label">persoane</span>
+            <span class="stat-label">people</span>
           </div>
           <div class="stat">
             <span class="stat-value">4</span>
-            <span class="stat-label">linii active</span>
+            <span class="stat-label">active lines</span>
           </div>
         </div>
 
@@ -155,7 +144,44 @@
 
         <p class="queue-tip">
           <ion-icon name="flash"></ion-icon>
-          Trecere foarte rapidă
+          Very fast passage
+        </p>
+      </div>
+      <div class="queue-card warning">
+        <div class="queue-header">
+          <div class="queue-title">
+            <ion-icon name="airplane"></ion-icon>
+            <h3>Gate A12</h3>
+          </div>
+          <div class="queue-badge warning">Moderate</div>
+        </div>
+
+        <div class="queue-stats">
+          <div class="stat">
+            <span class="stat-value">~18</span>
+            <span class="stat-label">minutes</span>
+          </div>
+          <div class="stat">
+            <span class="stat-value">42</span>
+            <span class="stat-label">people</span>
+          </div>
+          <div class="stat">
+            <span class="stat-value">2</span>
+            <span class="stat-label">active lines</span>
+          </div>
+        </div>
+
+        <div class="queue-chart">
+          <div class="chart-bar" style="height: 60%"></div>
+          <div class="chart-bar" style="height: 70%"></div>
+          <div class="chart-bar" style="height: 75%"></div>
+          <div class="chart-bar active" style="height: 65%"></div>
+          <div class="chart-bar" style="height: 55%"></div>
+        </div>
+
+        <p class="queue-tip">
+          <ion-icon name="cafe"></ion-icon>
+          You have time for a quick coffee
         </p>
       </div>
     </div>

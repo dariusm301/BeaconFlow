@@ -45,3 +45,39 @@
 ion-app {
   --ion-background-color: #ffffff;
 }
+
+/* Default: opaque background for all pages */
+body {
+  background: #f5f7fa !important;
+}
+
+/* When map page is active on native, make the entire shell transparent
+   so the native Google Map behind the WebView is visible */
+body.map-opened {
+  background: transparent !important;
+
+  ion-app {
+    background: transparent !important;
+    --ion-background-color: transparent !important;
+  }
+
+  /* Also make the inner scroll wrapper transparent */
+  ion-content {
+    --ion-background-color: transparent !important;
+  }
+
+  /* Make sure ion-router-outlet doesn't block */
+  ion-router-outlet {
+    background: transparent !important;
+  }
+}
+
+/* Prevent Capacitor from making ALL pages transparent */
+html.capacitor-google-map-transparent body:not(.map-opened) {
+  background: #f5f7fa !important;
+
+  ion-app {
+    background: #f5f7fa !important;
+    --ion-background-color: #ffffff !important;
+  }
+}

@@ -1,0 +1,26 @@
+<ion-tab-bar slot="end" class="toolbar-design">
+  <ion-tab-button (click)="navigateTo('dashboard')" [class.tab-selected]="currentRoute === 'dashboard'">
+    <ion-icon [name]="currentRoute === 'dashboard' ? 'home' : 'home-outline'"></ion-icon>
+    <ion-label>Home</ion-label>
+  </ion-tab-button>
+
+  <ion-tab-button (click)="navigateTo('queues')" [class.tab-selected]="currentRoute === 'queues'">
+    <ion-icon [name]="currentRoute === 'queues' ? 'people' : 'people-outline'"></ion-icon>
+    <ion-label>Queues</ion-label>
+  </ion-tab-button>
+
+  <ion-tab-button (click)="navigateTo('places')" [class.tab-selected]="currentRoute === 'places'">
+    <ion-icon [name]="currentRoute === 'places' ? 'compass' : 'compass-outline'"></ion-icon>
+    <ion-label>Facilities</ion-label>
+  </ion-tab-button>
+  <ion-tab-button (click)="navigateTo('admin-page')" [class.tab-selected]="currentRoute === 'admin-page'">
+    <ion-icon [name]="currentRoute === 'admin-page' ? 'settings' : 'settings-outline'"></ion-icon>
+    <ion-label>Admin</ion-label>
+  </ion-tab-button>
+  <ion-tab-button (click)="navigateTo('onboarding')" [class.tab-selected-exit]="currentRoute === 'onboarding'">
+    <ion-icon name="exit-outline"></ion-icon>
+    <ion-label>Exit</ion-label>
+  </ion-tab-button>
+
+</ion-tab-bar>
+

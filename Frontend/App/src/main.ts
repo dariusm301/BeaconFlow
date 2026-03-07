@@ -42,10 +42,20 @@ import {
   fastFood,
   compass,
   compassOutline,
-  exit
+  settings,
+  settingsOutline,
+  fingerPrint, exitOutline, locateOutline, airplaneOutline,
+  gitBranchOutline,
+  batteryFullOutline,
+  map,
+  close,
+  arrowBack
 } from 'ionicons/icons';
+import { defineCustomElements } from '@ionic/pwa-elements/loader';
+import {provideHttpClient} from "@angular/common/http";
 
-// Register icons
+defineCustomElements(window);
+
 addIcons({
   'airplane': airplane,
   'qr-code': qrCode,
@@ -84,12 +94,23 @@ addIcons({
   'fast-food': fastFood,
   'compass': compass,
   'compass-outline': compassOutline,
-  'exit-outline': exit
+  'exit-outline': exitOutline,
+  'settings': settings,
+  'settings-outline': settingsOutline,
+  'fingerprint': fingerPrint,
+  'locate': locateOutline,
+  'airplane-outline': airplaneOutline,
+  'git-branch-outline': gitBranchOutline,
+  'battery-outline': batteryFullOutline,
+  'map': map,
+  'close': close,
+  'arrow-back': arrowBack
 });
 
 bootstrapApplication(AppComponent, {
   providers: [
     provideRouter(routes),
-    provideIonicAngular({})
+    provideIonicAngular({}),
+    provideHttpClient()
   ]
 });

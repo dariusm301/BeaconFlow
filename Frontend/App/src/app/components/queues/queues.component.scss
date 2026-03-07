@@ -1,150 +1,174 @@
 .queues {
   --background: #f5f7fa;
+  margin-top: 20px;
 }
 
 .header {
   background: linear-gradient(135deg, #0066cc 0%, #004999 100%);
-  padding: 60px 20px 32px;
+  padding: 32px 20px;
   color: white;
-}
-
-.header h1 {
-  font-size: 28px;
-  font-weight: 700;
-}
-.header{
   display: flex;
   flex-direction: column;
   align-items: flex-start;
 }
 
+.header h1 {
+  font-size: 28px;
+  font-weight: 700;
+  margin: 20px 0 0;
+}
+
 .subtitle {
   font-size: 15px;
   opacity: 0.9;
-  margin: 0;
+  margin: 4px 0 0;
 }
 
 .queues-container {
   padding: 0 0 100px;
 }
 
-.map-section {
+// ── Journey Card (horizontal route) ──
+.journey-section {
   padding: 20px 16px;
 }
 
-.map-container {
+.journey-card {
   background: white;
   border-radius: 20px;
-  height: 280px;
-  position: relative;
-  overflow: hidden;
+  padding: 20px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
 }
 
-.map-overlay {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+.journey-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 28px;
 }
 
-.terminal-label {
-  position: absolute;
-  top: 16px;
-  left: 16px;
-  background: rgba(0, 102, 204, 0.1);
-  color: #0066cc;
-  padding: 8px 16px;
-  border-radius: 8px;
-  font-weight: 600;
+.journey-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #000;
+}
+
+.journey-total {
   font-size: 13px;
+  font-weight: 600;
+  color: #0066cc;
+  background: rgba(0, 102, 204, 0.1);
+  padding: 6px 12px;
+  border-radius: 20px;
 }
 
-.checkpoint {
-  position: absolute;
+.journey-route {
+  display: flex;
+  align-items: flex-start;
+}
+
+.route-stop {
   display: flex;
   flex-direction: column;
   align-items: center;
-  transform: translate(-50%, -50%);
-}
+  flex: 0 0 auto;
+  min-width: 64px;
 
-.checkpoint-pulse {
-  position: absolute;
-  width: 60px;
-  height: 60px;
-  border-radius: 50%;
-  background: rgba(52, 199, 89, 0.2);
-  animation: pulse 2s infinite;
-}
-
-.checkpoint-pulse.warning {
-  background: rgba(255, 149, 0, 0.2);
-}
-
-@keyframes pulse {
-  0% {
-    transform: scale(0.8);
-    opacity: 1;
-  }
-  100% {
-    transform: scale(1.5);
-    opacity: 0;
+  &.current {
+    min-width: 44px;
   }
 }
 
-.checkpoint-icon {
+.stop-top {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 44px;
+  margin-bottom: 10px;
+}
+
+.stop-dot {
   width: 44px;
   height: 44px;
-  background: #34c759;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 12px rgba(52, 199, 89, 0.3);
   position: relative;
   z-index: 2;
+
+  ion-icon {
+    font-size: 20px;
+    color: white;
+  }
+
+  &.current-dot {
+    width: 18px;
+    height: 18px;
+    background: #0066cc;
+    border: 3px solid white;
+    box-shadow: 0 0 0 3px #0066cc;
+  }
+
+  &.good-dot {
+    background: #34c759;
+    box-shadow: 0 3px 10px rgba(52, 199, 89, 0.35);
+  }
+
+  &.warning-dot {
+    background: #ff9500;
+    box-shadow: 0 3px 10px rgba(255, 149, 0, 0.35);
+  }
 }
 
-.checkpoint-icon.warning {
-  background: #ff9500;
-  box-shadow: 0 4px 12px rgba(255, 149, 0, 0.3);
+.pulse-ring {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: rgba(0, 102, 204, 0.3);
+  animation: pulse-ring 2s ease-out infinite;
 }
 
-.checkpoint-icon ion-icon {
-  font-size: 22px;
-  color: white;
+@keyframes pulse-ring {
+  0%   { transform: scale(1);   opacity: 1; }
+  100% { transform: scale(2.5); opacity: 0; }
 }
 
-.checkpoint-label {
-  margin-top: 8px;
-  font-size: 12px;
-  font-weight: 600;
-  color: #000;
-  white-space: nowrap;
-  background: white;
-  padding: 4px 8px;
-  border-radius: 6px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+.route-line {
+  flex: 1;
+  height: 3px;
+  border-radius: 3px;
+  margin-top: 21px;
+  min-width: 12px;
+
+  &.good-line {
+    background: #34c759;
+  }
+
+  &.warning-line {
+    background: linear-gradient(90deg, #34c759, #ff9500);
+  }
 }
 
-.checkpoint-time {
-  margin-top: 4px;
+.stop-label {
   font-size: 11px;
   font-weight: 600;
-  padding: 2px 8px;
-  border-radius: 4px;
+  color: #000;
+  text-align: center;
+  white-space: nowrap;
 }
 
-.checkpoint-time.good {
-  background: rgba(52, 199, 89, 0.15);
-  color: #34c759;
+.stop-time {
+  font-size: 11px;
+  font-weight: 700;
+  margin-top: 2px;
+
+  &.good-text    { color: #34c759; }
+  &.warning-text { color: #ff9500; }
 }
 
-.checkpoint-time.warning {
-  background: rgba(255, 149, 0, 0.15);
-  color: #ff9500;
-}
-
+// ── Detail Cards (original queue cards) ──
 .details-section {
   padding: 0 16px 20px;
 }

@@ -1,0 +1,78 @@
+<ion-content class="admin-login">
+  <div class="login-container">
+    <!-- Header with back button -->
+    <div class="header">
+      <button class="back-button" (click)="goBack()">
+        <ion-icon name="arrow-back-outline"></ion-icon>
+      </button>
+    </div>
+
+    <!-- Logo Section -->
+    <div class="logo-section">
+      <div class="logo-circle">
+        <ion-icon name="shield-checkmark-outline"></ion-icon>
+      </div>
+      <h1>Admin Login</h1>
+      <p class="subtitle">Access the admin panel</p>
+    </div>
+
+    <!-- Login Form -->
+    <div class="form-section">
+      <div class="form-group">
+        <label>USERNAME</label>
+        <div class="input-wrapper" [class.focused]="usernameFocused">
+          <ion-icon name="person-outline"></ion-icon>
+          <input
+            type="text"
+            [(ngModel)]="username"
+            placeholder="Enter username"
+            (focus)="usernameFocused = true"
+            (blur)="usernameFocused = false"
+            (keyup.enter)="login()"
+          />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>PASSWORD</label>
+        <div class="input-wrapper" [class.focused]="passwordFocused">
+          <ion-icon name="lock-closed-outline"></ion-icon>
+          <input
+            [type]="showPassword ? 'text' : 'password'"
+            [(ngModel)]="password"
+            placeholder="Enter password"
+            (focus)="passwordFocused = true"
+            (blur)="passwordFocused = false"
+            (keyup.enter)="login()"
+          />
+          <button class="toggle-password" (click)="togglePasswordVisibility()" type="button">
+            <ion-icon [name]="showPassword ? 'eye-off-outline' : 'eye-outline'"></ion-icon>
+          </button>
+        </div>
+      </div>
+
+      <!-- Error Message -->
+      <div class="error-message" *ngIf="errorMessage">
+        <ion-icon name="alert-circle-outline"></ion-icon>
+        <span>{{ errorMessage }}</span>
+      </div>
+
+      <!-- Login Button -->
+      <ion-button
+        expand="block"
+        (click)="login()"
+        [disabled]="isLoading"
+        class="login-button"
+      >
+        <ion-icon name="log-in-outline" slot="start" *ngIf="!isLoading"></ion-icon>
+        <span *ngIf="!isLoading">Login</span>
+        <span *ngIf="isLoading" class="loading-text">
+          <span class="spinner"></span>
+          Loading...
+        </span>
+      </ion-button>
+
+    </div>
+
+  </div>
+</ion-content>

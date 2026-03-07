@@ -27,19 +27,7 @@ import {exit} from "ionicons/icons";
   styleUrls: ['./app.component.scss']
 })
 export class AppComponent {
-  constructor(private router: Router) {}
-
-  get showTabs(): boolean {
-    return !this.router.url.includes('onboarding');
-  }
-
-  get currentRoute(): string {
-    return this.router.url.replace('/', '');
-  }
-
-  navigateTo(route: string) {
-    this.router.navigate([route]);
-  }
+  constructor() {}
 
   protected readonly exit = exit;
 }
