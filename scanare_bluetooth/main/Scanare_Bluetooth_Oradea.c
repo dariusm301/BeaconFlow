@@ -10,6 +10,7 @@
 #include "esp_wifi.h"
 #include "esp_mac.h"
 #include "esp_now.h"
+#include "esp_timer.h"
 static const uint8_t TARGET_SERVICE_UUID[16] = {
     0x9a, 0xd1, 0x0a, 0xdb, 0x80, 0x45, 0x12, 0xa4, 
     0xec, 0x4b, 0x7d, 0x4f, 0x7a, 0x19, 0x62, 0x80
@@ -18,22 +19,51 @@ uint8_t broadcastAddress[] = {0x3C, 0x61, 0x05, 0x64, 0xFA, 0x0C};
 #define MAX_PASSENGERS 100
 char ticket[20];
 #define PATH_LOSS_INDEX     2.5f    
-#define PROCESS_NOISE       0.015f
+#define PROCESS_NOISE       0.020f
 #define CALIBRATION_SAMPLES 100
+#define BATTERY_CAPACITY 8000
+#define CONSUM_BLE_SCAN_MA  100.0f
+#define CONSUM_IDLE_MA      45.0f
+#define CONSUM_ESP_NOW 150.0f
 float measurement_noise_R = 5.0f;
-bool is_calibrated = false;          
+bool is_calibrated = false;
+bool start_status=true;
+bool mesaj_sent=false;          
 float dynamic_rssi_1m = -59.0f;       
 float calibration_sum = 0.0f;
 float calibration_sq_sum = 0.0f;        
 int calibration_count = 0;
-esp_now_peer_info_t peerInfo;            
+float mAh_ramas = BATTERY_CAPACITY;
+uint64_t last_time_check = 0;
+uint8_t baterie_procent = 100;
+uint8_t ultima_baterie_transmisa = 101;
 
+esp_now_peer_info_t peerInfo;         
 typedef struct struct_message {
+    uint8_t tip;
     char checkpoint;
     char ticket_id[20];
 
 
 } __attribute__((packed)) esp_now_message;
+
+typedef struct calibrare_mess{
+    uint8_t tip;
+    char checkpoint;
+    bool calib;
+}__attribute__((packed)) esp_now_calib;
+
+typedef struct start_mess{
+    uint8_t tip;
+    char checkpoint;
+    bool start;
+}__attribute__((packed)) esp_now_start;
+typedef struct baterie_mess{
+    uint8_t tip;
+    char checkpoint;
+    uint8_t baterie;
+
+}__attribute__((packed)) esp_now_baterie;
 
 typedef struct {
     float Q;           
@@ -48,6 +78,23 @@ typedef struct {
     bool is_active;
     bool sent;
 } Passenger;
+
+bool update_battery_status() {
+    uint64_t now = esp_timer_get_time(); 
+    if (last_time_check == 0) { last_time_check = now; return false; }
+    float delta_hours = (float)(now - last_time_check) / 1000000.0f / 3600.0f; 
+    float consum_actual = (is_calibrated) ? CONSUM_BLE_SCAN_MA : CONSUM_IDLE_MA;
+    mAh_ramas -= (consum_actual * delta_hours);
+    last_time_check = now;
+    uint8_t procent_nou = (uint8_t)((mAh_ramas / BATTERY_CAPACITY) * 100.0f);
+    if (mAh_ramas <= 0) { mAh_ramas = 0; procent_nou = 0; }
+    if (procent_nou != ultima_baterie_transmisa) {
+        baterie_procent = procent_nou;
+        return true; 
+    }
+    
+    return false;
+}
 
 Passenger passengers[MAX_PASSENGERS];
 
@@ -128,12 +175,76 @@ void OnDataSent(const wifi_tx_info_t *txInfo, esp_now_send_status_t status) {
 
 void send_espnow_message(Passenger* p) {
     esp_now_message msg;
-    msg.checkpoint='A';
+    msg.tip=2;
+    msg.checkpoint='B';
     memcpy(msg.ticket_id,p->ticket_id,sizeof(p->ticket_id));
     p->sent = true;
     esp_err_t result = esp_now_send(broadcastAddress,(uint8_t *)&msg,sizeof(esp_now_message));
 
 
+}
+void send_espnow_calibration(bool calib_status) {
+    esp_now_calib cal;
+    cal.tip=1;
+    cal.calib = calib_status;
+    cal.calib=1;
+    cal.checkpoint='B';
+    esp_err_t result = esp_now_send(broadcastAddress, (uint8_t *)&cal, sizeof(esp_now_calib));
+    if (result == ESP_OK) {
+        printf("Calibration message sent: %s\n", calib_status ? "TRUE" : "FALSE");
+    } else {
+        printf("Calibration send failed: %d\n", result);
+    }
+}
+void send_espnow_start(bool start_status){
+    if(mesaj_sent==true){
+        return;
+    }
+    esp_now_start start;
+    start.tip=0;
+    start.start = 1;
+    start.checkpoint='B';
+    esp_err_t result = esp_now_send(broadcastAddress, (uint8_t *)&start, sizeof(esp_now_start));
+    if (result == ESP_OK) {
+        printf("Starting calibration message sent: %s\n", start_status ? "TRUE" : "FALSE");
+    } else {
+        printf("Starting calibration send failed: %d\n", result);
+    }
+}
+
+void send_espnow_battery() {
+    esp_now_baterie batt_msg;
+    batt_msg.tip = 3;
+    batt_msg.baterie = baterie_procent;
+    batt_msg.checkpoint='B';
+    esp_err_t result = esp_now_send(broadcastAddress, (uint8_t *)&batt_msg, sizeof(esp_now_baterie));
+    if (result == ESP_OK) {
+    printf(">>> Status Baterie Trimis: %d%%\n", baterie_procent);
+        ultima_baterie_transmisa = baterie_procent;
+    }
+}
+void battery_monitor_task(void *pvParameters) {
+    while (1) {
+        if (update_battery_status()) {
+            send_espnow_battery();
+        }
+        
+        vTaskDelay(pdMS_TO_TICKS(10000));
+    }
+}
+void monitor_tasks_status(void *pvParameters) {
+    char buffer[400]; 
+    
+    while (1) {
+        printf("\n--- Task Status List ---\n");
+        printf("Name          State  Priority  Stack   Num\n");
+        
+        vTaskList(buffer);
+        printf("%s", buffer);
+        
+        printf("------------------------\n");
+        vTaskDelay(pdMS_TO_TICKS(20000));
+    }
 }
 
 static void esp_gap_cb(esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param_t *param) {
@@ -156,6 +267,8 @@ static void esp_gap_cb(esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param_t *par
     int index=-1;
     
     if (!is_calibrated) {
+        send_espnow_start(start_status);
+        mesaj_sent=true;
         calibration_sum += raw_rssi;
         calibration_sq_sum += (raw_rssi * raw_rssi);
         calibration_count++;
@@ -173,6 +286,7 @@ static void esp_gap_cb(esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param_t *par
             Kalman_Init(&kf, PROCESS_NOISE, measurement_noise_R, dynamic_rssi_1m);
             
             is_calibrated = true;
+            send_espnow_calibration(is_calibrated);
             
             printf("\n--- CALIBRARE MEDIU COMPLETA ---\n");
             printf("Referinta (Mean) la 1m: %.2f dBm\n", dynamic_rssi_1m);
@@ -204,7 +318,7 @@ static void esp_gap_cb(esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param_t *par
         float filtered_rssi = Kalman_Update(&passengers[index].kf, (float)raw_rssi);
         float ratio = (dynamic_rssi_1m - filtered_rssi) / (10.0f * PATH_LOSS_INDEX);
         float dist_m = pow(10.0f, ratio);
-        if(dist_m<2.0f&&passengers[index].sent==false){
+        if(dist_m<1.0f&&passengers[index].sent==false){
             send_espnow_message(&passengers[index]);
 
         }
@@ -246,7 +360,8 @@ void app_main(void) {
     esp_bluedroid_enable();
     esp_ble_gap_register_callback(esp_gap_cb);
     esp_ble_gap_set_scan_params(&ble_scan_params);
-
+    xTaskCreate(battery_monitor_task, "battery_task", 3072, NULL, 5, NULL);
+    xTaskCreate(monitor_tasks_status, "monitor_task", 4096, NULL, 1, NULL);
     printf("--- SYSTEM READY ---\n");
     printf("Legend: Raw_RSSI, Filtered_RSSI, Distance(m)\n");
 }
