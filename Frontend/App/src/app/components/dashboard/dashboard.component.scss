@@ -219,7 +219,67 @@
   display: flex;
   gap: 16px;
   align-items: flex-start;
+  margin-bottom: 12px;
 }
+
+// Queue card — white card like status-card, clickable
+.queue-card {
+  background: white;
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 12px;
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+  .status-icon ion-icon {
+    font-size: 36px;
+    color: #0066cc;
+  }
+
+  .status-content {
+    flex: 1;
+
+    h3 {
+      font-size: 17px;
+      font-weight: 600;
+      margin: 0 0 4px;
+      color: #000;
+    }
+
+    .status-text {
+      font-size: 13px;
+      color: #8e8e93;
+      margin: 0;
+      line-height: 1.4;
+    }
+  }
+
+  .queue-arrow {
+    font-size: 20px;
+    color: #c0c0c0;
+    flex-shrink: 0;
+    animation: bounce-right 1.5s ease-in-out infinite;
+  }
+
+  &:active {
+    transform: scale(0.97);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+  }
+}
+
+@keyframes bounce-right {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(4px);
+  }
+}
+
 
 .tip-card ion-icon {
   font-size: 32px;

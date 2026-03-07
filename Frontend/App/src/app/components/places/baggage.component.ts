@@ -1,10 +1,12 @@
-import {Component, ElementRef, OnDestroy, ViewChild, ChangeDetectorRef} from '@angular/core';
+import { Component, ElementRef, OnDestroy, OnInit, ViewChild, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { IonContent, IonIcon } from '@ionic/angular/standalone';
-import {HeadboardComponent} from "../headbar/headboard.component";
+import { IonContent, IonIcon, IonSpinner } from '@ionic/angular/standalone';
+import { HeadboardComponent } from "../headbar/headboard.component";
 import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
-import {GoogleMap} from "@capacitor/google-maps";
+import { GoogleMap } from "@capacitor/google-maps";
 import { Geolocation as CapGeolocation } from '@capacitor/geolocation';
+import { Places } from "../services/places";
+import { AirportFacility } from "../models/places";
 
 interface Location {
   id: number;
@@ -19,22 +21,116 @@ interface Location {
   crowdLevel: string;
   crowdText: string;
   amenities: string[];
+  latitude: number;
+  longitude: number;
 }
 
 @Component({
   selector: 'app-places',
   standalone: true,
-  imports: [CommonModule, IonContent, IonIcon, HeadboardComponent],
+  imports: [CommonModule, IonContent, IonIcon, IonSpinner, HeadboardComponent],
   templateUrl: './baggage.component.html',
   styleUrls: ['./baggage.component.scss'],
   schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
-export class BaggageComponent implements OnDestroy {
+export class BaggageComponent implements OnInit, OnDestroy {
   @ViewChild('mapCanvas') mapRef!: ElementRef<HTMLElement>;
   newMap!: GoogleMap;
   mapOpen = false;
 
-  constructor(private cdr: ChangeDetectorRef) {}
+  locations: Location[] = [];
+  selectedNeed: string = 'all';
+  isLoading: boolean = true;
+
+  constructor(private cdr: ChangeDetectorRef, private service: Places) {}
+
+  ngOnInit() {
+    this.loadFacilities();
+  }
+
+  loadFacilities() {
+    this.isLoading = true;
+    this.service.getFacilities().subscribe({
+      next: (apiData: AirportFacility[]) => {
+        this.locations = apiData.map((item, index) => this.mapApiToLocation(item, index));
+        this.isLoading = false;
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Error loading facilities:', err);
+        this.isLoading = false;
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  private mapApiToLocation(apiItem: AirportFacility, index: number): Location {
+    let category = 'food';
+    let icon = 'restaurant';
+    let color = '#95a5a6';
+
+    switch(apiItem.type?.toLowerCase()) {
+      case 'food':
+      case 'restaurant':
+      case 'fast_food':
+      case 'fast food':
+      case 'fastfood':
+        category = 'food'; icon = 'restaurant'; color = '#E74C3C'; break;
+      case 'coffee':
+      case 'cafe':
+      case 'cafeteria':
+        category = 'coffee'; icon = 'cafe'; color = '#00704A'; break;
+      case 'shop':
+      case 'shopping':
+      case 'duty_free':
+      case 'duty free':
+      case 'store':
+        category = 'shop'; icon = 'bag'; color = '#3498DB'; break;
+      case 'lounge':
+      case 'relax':
+      case 'spa':
+        category = 'relax'; icon = 'leaf'; color = '#6B5B95'; break;
+      case 'service':
+      case 'services':
+      case 'info':
+      case 'information':
+      case 'help':
+        category = 'service'; icon = 'information-circle'; color = '#FF9500'; break;
+      case 'bar':
+      case 'pub':
+        category = 'food'; icon = 'wine'; color = '#8E44AD'; break;
+      case 'pharmacy':
+      case 'health':
+        category = 'service'; icon = 'medkit'; color = '#27AE60'; break;
+      case 'exchange':
+      case 'atm':
+      case 'bank':
+        category = 'service'; icon = 'card'; color = '#2C3E50'; break;
+      case 'work':
+      case 'business':
+      case 'business_center':
+        category = 'work'; icon = 'laptop'; color = '#2C3E50'; break;
+      default:
+        category = 'food'; icon = 'restaurant'; color = '#E74C3C'; break;
+    }
+
+    return {
+      id: index,
+      name: apiItem.name,
+      type: apiItem.type ? apiItem.type.charAt(0).toUpperCase() + apiItem.type.slice(1) : 'Facility',
+      category: category,
+      icon: icon,
+      color: color,
+      position: apiItem.location,
+      amenities: apiItem.facilities || [],
+      walkTime: Math.floor(Math.random() * 8 + 1) + ' min',
+      queueTime: '~' + Math.floor(Math.random() * 15) + ' min',
+      crowdLevel: apiItem.stars >= 4 ? 'medium' : 'low',
+      crowdText: apiItem.stars >= 4 ? 'Moderate' : 'Clear',
+      latitude: apiItem.latitude || 0,
+      longitude: apiItem.longitude || 0
+    };
+  }
 
   async openMap() {
     // 1. Show the map container (gives it real dimensions)
@@ -47,7 +143,7 @@ export class BaggageComponent implements OnDestroy {
     // 3. Wait for DOM to fully render with real dimensions
     await new Promise(resolve => setTimeout(resolve, 300));
 
-    // 4. NOW create the map - element has real dimensions, body is transparent
+
     await this.createMap();
   }
 
@@ -87,7 +183,6 @@ export class BaggageComponent implements OnDestroy {
   }
 
   private async createMap() {
-    // Safety check - element must exist and have dimensions
     if (!this.mapRef?.nativeElement) {
       console.error('Map element not found!');
       return;
@@ -102,17 +197,20 @@ export class BaggageComponent implements OnDestroy {
       return;
     }
 
-    let centerLat = 44.5032;
-    let centerLng = 26.0751;
-    let hasLocationPermission = false;
+    // Use first facility with valid coords as center, fallback to
+    const validLocations = this.locations.filter(l => l.latitude !== 0 && l.longitude !== 0);
+    let centerLat = 47.0253; // Latitudine Oradea Airport
+    let centerLng = 21.9025; // Longitudine Oradea Airport
+    if (validLocations.length > 0) {
+      centerLat = validLocations[0].latitude;
+      centerLng = validLocations[0].longitude;
+    }
 
+    let hasLocationPermission = false;
     try {
       const permissions = await CapGeolocation.requestPermissions();
       if (permissions.location === 'granted' || permissions.coarseLocation === 'granted') {
         hasLocationPermission = true;
-        const position = await CapGeolocation.getCurrentPosition();
-        centerLat = position.coords.latitude;
-        centerLng = position.coords.longitude;
       }
     } catch (e) {
       console.warn('Geolocation error:', e);
@@ -133,49 +231,34 @@ export class BaggageComponent implements OnDestroy {
       await this.newMap.enableCurrentLocation(true);
     }
 
-    console.log('Map created successfully!');
-  }
+    // --- COD NOU: Jittering + Optimizare cu addMarkers ---
 
-  selectedNeed: string = 'all';
+    // 1. Pregătim un array cu toate markerele și le aplicăm o mică dispersie
+    const markers = validLocations.map(loc => {
+      // Generăm o mică diferență (offset) de aprox. 10-15 metri
+      const offsetLat = (Math.random() - 0.5) * 0.00025;
+      const offsetLng = (Math.random() - 0.5) * 0.00025;
 
-  locations: Location[] = [
-    {
-      id: 1, name: 'Starbucks Terminal 1', type: 'Coffee Shop', category: 'coffee',
-      icon: 'cafe', color: '#00704A', walkTime: '2 min', queueTime: '~5 min',
-      position: 'Near Gate A8', crowdLevel: 'low', crowdText: 'Clear',
-      amenities: ['WiFi', 'Outlets', 'To-Go']
-    },
-    {
-      id: 2, name: 'Sky Lounge Premium', type: 'VIP Lounge', category: 'relax',
-      icon: 'leaf', color: '#6B5B95', walkTime: '3 min', queueTime: '~2 min',
-      position: 'Floor 2, Zone A', crowdLevel: 'low', crowdText: 'Clear',
-      amenities: ['WiFi', 'Drinks', 'Snacks', 'Showers']
-    },
-    {
-      id: 3, name: 'La Piazza Restaurant', type: 'Italian Restaurant', category: 'food',
-      icon: 'restaurant', color: '#E74C3C', walkTime: '4 min', queueTime: '~12 min',
-      position: 'Central Food Court', crowdLevel: 'medium', crowdText: 'Moderate',
-      amenities: ['Full Menu', 'Vegetarian', 'WiFi']
-    },
-    {
-      id: 4, name: 'Duty Free Shop', type: 'Shop', category: 'shop',
-      icon: 'bag', color: '#3498DB', walkTime: '1 min', queueTime: '~8 min',
-      position: 'Central Zone', crowdLevel: 'medium', crowdText: 'Moderate',
-      amenities: ['Perfumes', 'Alcohol', 'Chocolate']
-    },
-    {
-      id: 5, name: 'Business Center', type: 'Work Area', category: 'work',
-      icon: 'laptop', color: '#2C3E50', walkTime: '5 min', queueTime: 'No queue',
-      position: 'Floor 2, Zone B', crowdLevel: 'low', crowdText: 'Clear',
-      amenities: ['Fast WiFi', 'Printer', 'Outlets', 'Ergonomic Chairs']
-    },
-    {
-      id: 6, name: 'Quick Bites', type: 'Fast Food', category: 'food',
-      icon: 'fast-food', color: '#F39C12', walkTime: '2 min', queueTime: '~6 min',
-      position: 'Near Gate A10', crowdLevel: 'low', crowdText: 'Clear',
-      amenities: ['Sandwiches', 'Salads', 'To-Go']
+      return {
+        coordinate: {
+          lat: loc.latitude + offsetLat,
+          lng: loc.longitude + offsetLng
+        },
+        title: loc.name,
+        snippet: loc.type + ' • ' + loc.position
+      };
+    });
+
+    try {
+      if (markers.length > 0) {
+        await this.newMap.addMarkers(markers);
+      }
+    } catch (e) {
+      console.warn('Eroare la adăugarea markerelor:', e);
     }
-  ];
+
+    console.log('Harta creată cu', markers.length, 'markere dispersate');
+  }
 
   get filteredLocations(): Location[] {
     if (this.selectedNeed === 'all') return this.locations;

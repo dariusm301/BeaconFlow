@@ -1,6 +1,18 @@
 <app-headboard></app-headboard>
 <ion-content class="admin-page">
   <div class="admin-container">
+
+    <!-- Loading State -->
+    <div class="loading-container" *ngIf="isLoading">
+      <div class="loading-icon">
+        <ion-icon name="hardware-chip-outline"></ion-icon>
+      </div>
+      <ion-spinner name="crescent" color="primary"></ion-spinner>
+      <p class="loading-text">Loading devices...</p>
+    </div>
+
+    <!-- Content (only when loaded) -->
+    <ng-container *ngIf="!isLoading">
     <!-- Header -->
     <div class="header">
       <div class="header-title">
@@ -46,53 +58,47 @@
     <!-- Devices List -->
     <div class="section-header">
       <h2>ESP Devices</h2>
-      <span class="device-count">{{ devices.length }} devices</span>
+      <span class="device-count">{{ devices.length  }} devices</span>
     </div>
-  <!-- MAIN ESP -->
-    <div class="device-card" *ngIf="mainESP != null">
-    <div class="device-header">
-      <div class="device-icon" [style.background]="getStatusColor(true)">
-        <ion-icon name="bluetooth-outline"></ion-icon>
-      </div>
-      <div class="device-info">
-        <h3> Central ESP </h3>
-        <div class="device-status">
-          <span class="status-dot" [style.background]="getStatusColor(true)"></span>
-          <span>{{ getStatusText(true) }}</span>
-        </div>
-      </div>
-    </div>
+    <!-- MAIN ESP -->
 
-    <!-- Device Details -->
-    <div class="device-details">
-      <!-- Gate Info -->
-      <div class="detail-row">
-        <div class="detail-item">
-          <ion-icon name="location-outline"></ion-icon>
-          <span class="detail-label">Gate</span>
-          <span class="detail-value">Main Gateway</span>
+
+    <div class="devices-list">
+      <div class="device-card" *ngIf="mainESP != null">
+        <div class="device-header">
+          <div class="device-icon" [style.background]="getStatusColor(true)">
+            <ion-icon name="bluetooth-outline"></ion-icon>
+          </div>
+          <div class="device-info">
+            <h3> Central ESP </h3>
+            <div class="device-status">
+              <span class="status-dot" [style.background]="getStatusColor(true)"></span>
+              <span>{{ getStatusText(true) }}</span>
+            </div>
+          </div>
         </div>
 
-      </div>
+        <!-- Device Details -->
+        <div class="device-details">
+          <!-- Gate Info -->
+          <div class="detail-row">
+            <div class="detail-item">
+              <ion-icon name="location-outline"></ion-icon>
+              <span class="detail-label">Gate</span>
+              <span class="detail-value">Main Gateway</span>
+            </div>
 
-      <!-- UUID -->
-      <div class="uuid-row">
-        <span class="uuid-label">MAC Address:</span>
-        <span class="uuid-value">{{ mainESP.mac }}</span>
-      </div>
+          </div>
+          <!-- UUID -->
+          <div class="uuid-row">
+            <span class="uuid-label">MAC Address:</span>
+            <span class="uuid-value">{{ mainESP?.mac || 'N/A' }}</span>
+          </div>
 
-      <!-- Calibration Status -->
-      <div class="calibration-row">
-        <div class="calibration-status" [class.calibrated]="true"
-             [class.not-calibrated]="!true">
-          <ion-icon [name]="true ? 'checkmark-circle-outline' : 'close-circle-outline'"></ion-icon>
-          <span>{{true ? 'Calibrated' : 'Not Calibrated' }}</span>
+          <!-- Calibration Status -->
+
         </div>
       </div>
-    </div>
-    </div>
-
-    <div class="devices-list" *ngIf="devices.length > 0">
       <div class="device-card" *ngFor="let device of devices">
         <!-- Device Header -->
         <div class="device-header">
@@ -148,9 +154,9 @@
               <ion-icon [name]="device.calibrated ? 'checkmark-circle-outline' : 'close-circle-outline'"></ion-icon>
               <span>{{ device.calibrated ? 'Calibrated' : 'Not Calibrated' }}</span>
             </div>
-            <div class="signal-strength" *ngIf="device.baterie_procent">
+            <div class="signal-strength">
               <ion-icon name="battery-outline"></ion-icon>
-              <span>{{ device.baterie_procent }}%</span>
+              <span>{{ device.battery }}%</span>
             </div>
           </div>
         </div>
@@ -180,11 +186,12 @@
       </div>
       <h3>No ESP Devices</h3>
       <p>Press the + button to add your first device</p>
-      <ion-button (click)="addDevice()">
+      <ion-button (click)="openAddForm()">
         <ion-icon name="add-outline" slot="start"></ion-icon>
         Add Device
       </ion-button>
     </div>
+    </ng-container>
   </div>
 
   <!-- Add/Edit Form Modal -->

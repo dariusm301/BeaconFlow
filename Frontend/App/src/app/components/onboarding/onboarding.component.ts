@@ -1,10 +1,11 @@
-import {Component, ElementRef, ViewChild} from '@angular/core';
+import {Component, ElementRef, ViewChild, ChangeDetectorRef} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import {IonContent, IonIcon, IonButton, IonInput, IonSpinner} from '@ionic/angular/standalone';
+import {IonContent, IonIcon, IonButton, IonSpinner} from '@ionic/angular/standalone';
 import {Onboarding} from "../services/onboarding";
 import {HeadboardComponent} from "../headbar/headboard.component";
 import {Camera, CameraResultType, CameraSource} from "@capacitor/camera";
+
 
 @Component({
   selector: 'app-onboarding',
@@ -14,11 +15,12 @@ import {Camera, CameraResultType, CameraSource} from "@capacitor/camera";
   styleUrls: ['./onboarding.component.scss']
 })
 export class OnboardingComponent {
-  constructor(private router: Router,private service: Onboarding) {}
+  constructor(private router: Router, private service: Onboarding, private cdr: ChangeDetectorRef) {}
 
   @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
 
   state= "default"; // default or loading
+  debugLog: string = '';
 
   selectedFile : File | null = null;
 
@@ -38,62 +40,72 @@ export class OnboardingComponent {
 
   }
 
-  handleFileChange(){
+  handleFileChange() {
     const file = this.fileInput.nativeElement.files?.[0];
-    if(file){
-      console.log('Selected file:', file);
+    if (file) {
+      this.debugLog = 'File selected: ' + file.name + ' (' + file.size + ' bytes)';
       this.state = "loading";
+      this.cdr.detectChanges();
 
+      this.debugLog += ' | Calling uploadTicket...';
+      this.cdr.detectChanges();
 
       this.service.uploadTicket(file).subscribe({
         next: (response) => {
+          this.debugLog += ' | SUCCESS: ' + JSON.stringify(response).substring(0, 100);
+          this.cdr.detectChanges();
           this.router.navigate(['/dashboard']);
-
-          console.log('Upload successful:', response);
         },
         error: (error) => {
-          this.state= "default";
+          this.debugLog += ' | ERROR: ' + (error?.message || JSON.stringify(error).substring(0, 100));
+          this.state = "default";
           this.selectedFile = null;
-
-          console.error('Upload failed:', error);
+          this.cdr.detectChanges();
         }
-      }
-      )
+      });
     }
   }
+
   async takePhoto() {
     try {
+      this.debugLog = 'Opening camera...';
+      this.cdr.detectChanges();
+
       const image = await Camera.getPhoto({
         quality: 90,
         allowEditing: false,
         resultType: CameraResultType.Uri,
-        source: CameraSource.Camera
+        source: CameraSource.Prompt
       });
 
       if (image.webPath) {
+        this.debugLog += ' | Photo taken, converting...';
         this.state = "loading";
-
+        this.cdr.detectChanges();
 
         const blob = await this.base64FromPath(image.webPath);
-
-
         const file = new File([blob], `photo_${Date.now()}.jpg`, { type: 'image/jpeg' });
 
+        this.debugLog += ' | File created: ' + file.size + ' bytes | Uploading...';
+        this.cdr.detectChanges();
 
         this.service.uploadTicket(file).subscribe({
           next: (response) => {
-            console.log('Photo upload successful:', response);
+            this.debugLog += ' | SUCCESS: ' + JSON.stringify(response).substring(0, 100);
+            this.cdr.detectChanges();
             this.router.navigate(['/dashboard']);
           },
           error: (error) => {
+            this.debugLog += ' | ERROR: ' + (error?.message || JSON.stringify(error).substring(0, 100));
             this.state = "default";
-            console.error('Photo upload failed:', error);
+            this.cdr.detectChanges();
           }
         });
       }
 
-    } catch (error) {
-      console.error('Camera error:', error);
+    } catch (error: any) {
+      this.debugLog += ' | CAMERA ERROR: ' + (error?.message || error);
+      this.cdr.detectChanges();
     }
   }
   private async base64FromPath(path: string): Promise<Blob> {

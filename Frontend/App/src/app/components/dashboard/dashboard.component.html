@@ -15,7 +15,7 @@
           </div>
           <div class="flight-path">
             <div class="line"></div>
-            <ion-icon name="airplane"></ion-icon>
+            <ion-icon name="airplane" style="transform: rotate(270deg);"></ion-icon>
             <div class="line"></div>
           </div>
           <div class="airport">
@@ -93,6 +93,16 @@
 
     <div class="tips-section">
       <h2 class="section-title">Recommendations</h2>
+      <div class="queue-card" (click)="goToQueues()">
+        <div class="status-icon">
+          <ion-icon name="people"></ion-icon>
+        </div>
+        <div class="status-content">
+          <h3>Check Queue Status</h3>
+          <p class="status-text">Monitor real-time queue times at security, passport control and boarding gate</p>
+        </div>
+        <ion-icon name="chevron-forward" class="queue-arrow"></ion-icon>
+      </div>
       <div class="tip-card">
         <ion-icon name="cafe"></ion-icon>
         <div>

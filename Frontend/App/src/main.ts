@@ -49,7 +49,10 @@ import {
   batteryFullOutline,
   map,
   close,
-  arrowBack
+  arrowBack,
+  wine,
+  medkit,
+  card
 } from 'ionicons/icons';
 import { defineCustomElements } from '@ionic/pwa-elements/loader';
 import {provideHttpClient} from "@angular/common/http";
@@ -104,7 +107,10 @@ addIcons({
   'battery-outline': batteryFullOutline,
   'map': map,
   'close': close,
-  'arrow-back': arrowBack
+  'arrow-back': arrowBack,
+  'wine': wine,
+  'medkit': medkit,
+  'card': card
 });
 
 bootstrapApplication(AppComponent, {

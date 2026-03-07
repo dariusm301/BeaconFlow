@@ -1,8 +1,8 @@
 import {Component, OnInit} from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 import { IonContent, IonIcon } from '@ionic/angular/standalone';
 import {HeadboardComponent} from "../headbar/headboard.component";
-import {Location} from "../services/location";
 
 @Component({
   selector: 'app-dashboard',
@@ -12,9 +12,12 @@ import {Location} from "../services/location";
   styleUrls: ['./dashboard.component.scss']
 })
 export class DashboardComponent implements OnInit {
-  constructor() {
+  constructor(private router: Router) {
   }
   ngOnInit() {
   }
 
+  goToQueues() {
+    this.router.navigate(['/queues']);
+  }
 }

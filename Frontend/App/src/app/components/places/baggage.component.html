@@ -8,6 +8,15 @@
   </div>
 
   <div class="lounge-container">
+
+    <!-- Loading State -->
+    <div class="loading-container" *ngIf="isLoading">
+      <ion-spinner name="crescent" color="primary"></ion-spinner>
+      <p class="loading-text">Loading facilities...</p>
+    </div>
+
+    <!-- Content (only when loaded) -->
+    <ng-container *ngIf="!isLoading">
     <div class="needs-section">
       <h2 class="section-title">What are you looking for?</h2>
       <div class="needs-filters">
@@ -30,6 +39,10 @@
         <button class="need-btn" [class.active]="selectedNeed === 'shop'" (click)="selectNeed('shop')">
           <ion-icon name="bag"></ion-icon>
           <span>Shopping</span>
+        </button>
+        <button class="need-btn" [class.active]="selectedNeed === 'service'" (click)="selectNeed('service')">
+          <ion-icon name="information-circle"></ion-icon>
+          <span>Services</span>
         </button>
         <button class="need-btn" [class.active]="selectedNeed === 'work'" (click)="selectNeed('work')">
           <ion-icon name="laptop"></ion-icon>
@@ -68,7 +81,7 @@
           </div>
           <div class="location-amenities">
             <span class="amenity" *ngFor="let amenity of location.amenities">
-              {{ amenity }}
+              {{ amenity | titlecase }}
             </span>
           </div>
         </div>
@@ -90,6 +103,7 @@
         <p>According to real-time data, now is the best time to visit the restaurant area - queues are minimal!</p>
       </div>
     </div>
+    </ng-container>
   </div>
 </ion-content>
 

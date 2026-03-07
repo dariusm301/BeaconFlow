@@ -4,7 +4,7 @@ export interface ESP{
   gate: string;
   uuid: string;
   calibrated: boolean;
-  baterie_procent: string;
+  battery: string;
 
 }
 export interface MainESP{
