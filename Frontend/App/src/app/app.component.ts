@@ -1,11 +1,33 @@
 import { Component } from '@angular/core';
-import { IonApp, IonRouterOutlet } from '@ionic/angular/standalone';
+import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
+import {
+  IonApp,
+  IonRouterOutlet,
+  IonTabBar,
+  IonTabButton,
+  IonIcon,
+  IonLabel
+} from '@ionic/angular/standalone';
+import {exit} from "ionicons/icons";
 
 @Component({
   selector: 'app-root',
-  templateUrl: 'app.component.html',
-  imports: [IonApp, IonRouterOutlet],
+  standalone: true,
+  imports: [
+    CommonModule,
+    IonApp,
+    IonRouterOutlet,
+    IonTabBar,
+    IonTabButton,
+    IonIcon,
+    IonLabel
+  ],
+  templateUrl: './app.component.html',
+  styleUrls: ['./app.component.scss']
 })
 export class AppComponent {
   constructor() {}
+
+  protected readonly exit = exit;
 }

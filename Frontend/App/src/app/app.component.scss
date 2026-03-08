@@ -1,0 +1,36 @@
+ion-app {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+ion-tab-bar {
+  --background: #ffffff;
+  border-top: 1px solid #e0e0e0;
+  height: 65px;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+ion-tab-button {
+  --color: #8e8e93;
+  --color-selected: #0066cc;
+  transition: all 0.2s ease;
+}
+
+ion-tab-button.tab-selected {
+  --color: #0066cc;
+}
+ion-tab-button.tab-selected-exit {
+  --color: red;
+}
+ion-tab-button ion-icon {
+  font-size: 24px;
+  margin-bottom: 4px;
+}
+
+ion-tab-button ion-label {
+  font-size: 12px;
+  font-weight: 500;
+}
+
+ion-content {
+  --padding-bottom: 65px;
+}

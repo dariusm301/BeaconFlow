@@ -1,0 +1,123 @@
+<app-headboard *ngIf="!mapOpen"></app-headboard>
+
+<!-- Normal page content -->
+<ion-content class="lounge" *ngIf="!mapOpen">
+  <div class="header">
+    <h1>Airport Facilities</h1>
+    <p class="subtitle">Find the perfect place for you</p>
+  </div>
+
+  <div class="lounge-container">
+
+    <!-- Loading State -->
+    <div class="loading-container" *ngIf="isLoading">
+      <ion-spinner name="crescent" color="primary"></ion-spinner>
+      <p class="loading-text">Loading facilities...</p>
+    </div>
+
+    <!-- Content (only when loaded) -->
+    <ng-container *ngIf="!isLoading">
+    <div class="needs-section">
+      <h2 class="section-title">What are you looking for?</h2>
+      <div class="needs-filters">
+        <button class="need-btn" [class.active]="selectedNeed === 'all'" (click)="selectNeed('all')">
+          <ion-icon name="grid"></ion-icon>
+          <span>All</span>
+        </button>
+        <button class="need-btn" [class.active]="selectedNeed === 'food'" (click)="selectNeed('food')">
+          <ion-icon name="restaurant"></ion-icon>
+          <span>Food</span>
+        </button>
+        <button class="need-btn" [class.active]="selectedNeed === 'coffee'" (click)="selectNeed('coffee')">
+          <ion-icon name="cafe"></ion-icon>
+          <span>Coffee</span>
+        </button>
+        <button class="need-btn" [class.active]="selectedNeed === 'relax'" (click)="selectNeed('relax')">
+          <ion-icon name="leaf"></ion-icon>
+          <span>Relax</span>
+        </button>
+        <button class="need-btn" [class.active]="selectedNeed === 'shop'" (click)="selectNeed('shop')">
+          <ion-icon name="bag"></ion-icon>
+          <span>Shopping</span>
+        </button>
+        <button class="need-btn" [class.active]="selectedNeed === 'service'" (click)="selectNeed('service')">
+          <ion-icon name="information-circle"></ion-icon>
+          <span>Services</span>
+        </button>
+        <button class="need-btn" [class.active]="selectedNeed === 'work'" (click)="selectNeed('work')">
+          <ion-icon name="laptop"></ion-icon>
+          <span>Work</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="locations-section">
+      <h2 class="section-title">Available Facilities</h2>
+      <div class="location-card" *ngFor="let location of filteredLocations">
+        <div class="location-image" [style.background-color]="location.color">
+          <ion-icon [name]="location.icon"></ion-icon>
+        </div>
+        <div class="location-info">
+          <div class="location-header">
+            <h3>{{ location.name }}</h3>
+            <div class="location-badge" [class]="location.crowdLevel">
+              {{ location.crowdText }}
+            </div>
+          </div>
+          <p class="location-type">{{ location.type }}</p>
+          <div class="location-details">
+            <div class="detail">
+              <ion-icon name="walk"></ion-icon>
+              <span>{{ location.walkTime }}</span>
+            </div>
+            <div class="detail">
+              <ion-icon name="time"></ion-icon>
+              <span>Queue: {{ location.queueTime }}</span>
+            </div>
+            <div class="detail">
+              <ion-icon name="location"></ion-icon>
+              <span>{{ location.position }}</span>
+            </div>
+          </div>
+          <div class="location-amenities">
+            <span class="amenity" *ngFor="let amenity of location.amenities">
+              {{ amenity | titlecase }}
+            </span>
+          </div>
+        </div>
+        <div class="location-action">
+          <ion-icon name="chevron-forward"></ion-icon>
+        </div>
+      </div>
+    </div>
+
+    <button class="open-map-btn" (click)="openMap()">
+      <ion-icon name="map"></ion-icon>
+      <span>Open Terminal Map</span>
+    </button>
+
+    <div class="tips-card">
+      <ion-icon name="bulb"></ion-icon>
+      <div>
+        <h4>Smart Tip</h4>
+        <p>According to real-time data, now is the best time to visit the restaurant area - queues are minimal!</p>
+      </div>
+    </div>
+    </ng-container>
+  </div>
+</ion-content>
+
+<!-- MAP VIEW: completely separate page, replaces everything above -->
+<div class="map-page" *ngIf="mapOpen">
+  <div class="map-back-bar">
+    <button class="map-close-btn" (click)="closeMap()">
+      <ion-icon name="arrow-back"></ion-icon>
+      <span>Back</span>
+    </button>
+    <h2>Terminal Map</h2>
+    <div class="spacer"></div>
+  </div>
+  <div class="map-container">
+    <capacitor-google-map #mapCanvas style="display: inline-block; width: 100%; height: 100%;"></capacitor-google-map>
+  </div>
+</div>
