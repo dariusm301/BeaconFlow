@@ -1,0 +1,61 @@
+<ion-content class="onboarding">
+  <div class="onboarding-container">
+    <div class="admin-settings">
+      <div class="admin-icon" (click)="goToAdminLogin()">
+        <ion-icon name="settings"></ion-icon>
+      </div>
+    </div>
+    <div class="logo-section">
+      <div class="logo-circle">
+        <ion-icon name="airplane"></ion-icon>
+      </div>
+      <h1>BFlow</h1>
+      <p class="subtitle">Your trip, our stress</p>
+    </div>
+
+    <div class="qr-section">
+      <div class="qr-placeholder">
+        <div class="qr-frame">
+          <div class="qr-corners">
+            <div class="corner top-left"></div>
+            <div class="corner top-right"></div>
+            <div class="corner bottom-left"></div>
+            <div class="corner bottom-right"></div>
+          </div>
+          <ion-icon name="qr-code" class="qr-icon"></ion-icon>
+        </div>
+      </div>
+
+      <h2>Scan Boarding Pass</h2>
+      <p class="description">
+        Position your boarding pass QR code in the frame to start real-time monitoring
+      </p>
+    </div>
+
+    <div class="actions">
+<!--      <ion-button expand="block" size="large" (click)="loadFile()">-->
+<!--        <div *ngIf="state == 'default'" class="loader">-->
+<!--        <ion-icon slot="start" name="scan"></ion-icon>-->
+<!--        <p>Scan now-->
+<!--      </div>-->
+<!--        <div *ngIf="state == 'loading'" class="loader">-->
+<!--          <p>Loading</p>-->
+<!--          <ion-spinner name="lines"></ion-spinner>-->
+<!--        </div>-->
+<!--      </ion-button>-->
+      <ion-button expand="block" size="large" (click)="takePhoto()">
+        <div *ngIf="state == 'default'" class="loader">
+          <ion-icon slot="start" name="scan"></ion-icon>
+          <p>Scan now
+        </div>
+        <div *ngIf="state == 'loading'" class="loader">
+          <p>Loading</p>
+          <ion-spinner name="lines"></ion-spinner>
+        </div>
+      </ion-button>
+      <input #fileInput type="file" accept=".pdf,.png,.jpeg " (change)="handleFileChange()" class="inputDesign">
+    </div>
+
+
+  </div>
+</ion-content>

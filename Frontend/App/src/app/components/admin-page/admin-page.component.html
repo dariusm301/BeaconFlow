@@ -1,0 +1,270 @@
+<app-headboard></app-headboard>
+<ion-content class="admin-page">
+  <div class="admin-container">
+
+    <!-- Loading State -->
+    <div class="loading-container" *ngIf="isLoading">
+      <div class="loading-icon">
+        <ion-icon name="hardware-chip-outline"></ion-icon>
+      </div>
+      <ion-spinner name="crescent" color="primary"></ion-spinner>
+      <p class="loading-text">Loading devices...</p>
+    </div>
+
+    <!-- Content (only when loaded) -->
+    <ng-container *ngIf="!isLoading">
+    <!-- Header -->
+    <div class="header">
+      <div class="header-title">
+        <h1>ESP Device Manager</h1>
+        <p>Bluetooth device management</p>
+      </div>
+      <button class="add-button" (click)="openAddForm()">
+        <ion-icon name="add-outline"></ion-icon>
+      </button>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-icon blue">
+          <ion-icon name="hardware-chip-outline"></ion-icon>
+        </div>
+        <div class="stat-info">
+          <span class="stat-value">{{ devices.length }}</span>
+          <span class="stat-label">Total ESP</span>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon green">
+          <ion-icon name="checkmark-circle-outline"></ion-icon>
+        </div>
+        <div class="stat-info">
+          <span class="stat-value">{{ getCalibratedCount() }}</span>
+          <span class="stat-label">Calibrated</span>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon orange">
+          <ion-icon name="sync-outline"></ion-icon>
+        </div>
+        <div class="stat-info">
+          <span class="stat-value">{{ getOnlineCount() }}</span>
+          <span class="stat-label">Online</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Devices List -->
+    <div class="section-header">
+      <h2>ESP Devices</h2>
+      <span class="device-count">{{ devices.length  }} devices</span>
+    </div>
+    <!-- MAIN ESP -->
+
+
+    <div class="devices-list">
+      <div class="device-card" *ngIf="mainESP != null">
+        <div class="device-header">
+          <div class="device-icon" [style.background]="getStatusColor(true)">
+            <ion-icon name="bluetooth-outline"></ion-icon>
+          </div>
+          <div class="device-info">
+            <h3> Central ESP </h3>
+            <div class="device-status">
+              <span class="status-dot" [style.background]="getStatusColor(true)"></span>
+              <span>{{ getStatusText(true) }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Device Details -->
+        <div class="device-details">
+          <!-- Gate Info -->
+          <div class="detail-row">
+            <div class="detail-item">
+              <ion-icon name="location-outline"></ion-icon>
+              <span class="detail-label">Gate</span>
+              <span class="detail-value">Main Gateway</span>
+            </div>
+
+          </div>
+          <!-- UUID -->
+          <div class="uuid-row">
+            <span class="uuid-label">MAC Address:</span>
+            <span class="uuid-value">{{ mainESP?.mac || 'N/A' }}</span>
+          </div>
+
+          <!-- Calibration Status -->
+
+        </div>
+      </div>
+      <div class="device-card" *ngFor="let device of devices">
+        <!-- Device Header -->
+        <div class="device-header">
+          <div class="device-icon" [style.background]="getStatusColor(device.calibrated)">
+            <ion-icon name="bluetooth-outline"></ion-icon>
+          </div>
+          <div class="device-info">
+            <h3> Gate {{ device.gate }} CheckPoint {{ device.checkpoint }}</h3>
+            <div class="device-status">
+              <span class="status-dot" [style.background]="getStatusColor(device.calibrated)"></span>
+              <span>{{ getStatusText(device.calibrated) }}</span>
+            </div>
+          </div>
+          <div class="device-actions">
+            <button class="action-btn edit" (click)="openEditForm(device)">
+              <ion-icon name="create-outline"></ion-icon>
+            </button>
+            <button class="action-btn delete" (click)="deleteDevice(device)">
+              <ion-icon name="trash-outline"></ion-icon>
+            </button>
+          </div>
+        </div>
+
+        <!-- Device Details -->
+        <div class="device-details">
+          <!-- Gate Info -->
+          <div class="detail-row">
+            <div class="detail-item">
+              <ion-icon name="location-outline"></ion-icon>
+              <span class="detail-label">Gate</span>
+              <span class="detail-value">{{ device.gate }}</span>
+            </div>
+            <div class="detail-item">
+              <ion-icon [name]="device.checkpoint === 'IN' ? 'enter-outline' : 'exit-outline'"></ion-icon>
+              <span class="detail-label">Checkpoint</span>
+              <span class="detail-value checkpoint" [class.in]="device.checkpoint === 'IN'"
+                    [class.out]="device.checkpoint === 'OUT'">
+                              {{ device.checkpoint }}
+                            </span>
+            </div>
+          </div>
+
+          <!-- UUID -->
+          <div class="uuid-row">
+            <span class="uuid-label">Target UUID:</span>
+            <span class="uuid-value">{{ device.uuid }}</span>
+          </div>
+
+          <!-- Calibration Status -->
+          <div class="calibration-row">
+            <div class="calibration-status" [class.calibrated]="device.calibrated"
+                 [class.not-calibrated]="!device.calibrated">
+              <ion-icon [name]="device.calibrated ? 'checkmark-circle-outline' : 'close-circle-outline'"></ion-icon>
+              <span>{{ device.calibrated ? 'Calibrated' : 'Not Calibrated' }}</span>
+            </div>
+            <div class="signal-strength">
+              <ion-icon name="battery-outline"></ion-icon>
+              <span>{{ device.battery }}%</span>
+            </div>
+          </div>
+        </div>
+
+                        <div class="device-footer">
+                          <button (click)="calibrateDevice(device)"
+                            class="footer-btn calibrate-btn"
+                            [class.calibrating]="device.calibrated"
+                            [disabled]="device.calibrated"
+
+                          >
+                            <ion-icon name="refresh-outline" ></ion-icon>
+                            <span>{{ device.calibrated ? 'Calibrated' : 'Calibrate' }}</span>
+                          </button >
+                        </div>
+      </div>
+    </div>
+
+    <!-- Empty State -->
+    <div class="empty-state" *ngIf="devices.length === 0">
+      <div class="empty-icon">
+        <ion-icon name="hardware-chip-outline"></ion-icon>
+      </div>
+      <h3>No ESP Devices</h3>
+      <p>Press the + button to add your first device</p>
+      <ion-button (click)="openAddForm()">
+        <ion-icon name="add-outline" slot="start"></ion-icon>
+        Add Device
+      </ion-button>
+    </div>
+    </ng-container>
+  </div>
+
+  <!-- Add/Edit Form Modal -->
+  <div class="modal-overlay" *ngIf="showAddForm || showEditForm" (click)="closeForm()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>{{ showAddForm ? 'Add New ESP' : 'Edit ESP' }}</h2>
+        <button class="close-btn" (click)="closeForm()">
+          <ion-icon name="close-outline"></ion-icon>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Checkpoint Type</label>
+          <div class="toggle-buttons">
+            <button
+              class="toggle-btn"
+              [class.active]="formData.checkpoint === 'IN'"
+              (click)="formData.checkpoint = 'IN'"
+            >
+              <ion-icon name="enter-outline"></ion-icon>
+              <span>IN (Entry)</span>
+            </button>
+            <button
+              class="toggle-btn"
+              [class.active]="formData.checkpoint === 'OUT'"
+              (click)="formData.checkpoint = 'OUT'"
+            >
+              <ion-icon name="exit-outline"></ion-icon>
+              <span>OUT (Exit)</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Gate Number -->
+        <div class="form-group">
+          <label>Gate Number</label>
+          <div class="input-wrapper">
+            <ion-icon name="location-outline"></ion-icon>
+            <input
+              type="number"
+              [(ngModel)]="formData.gate"
+              min="1"
+              placeholder="E.g.: 1"
+            />
+          </div>
+        </div>
+
+        <!-- Target UUID -->
+        <div class="form-group">
+          <label>Target UUID (Beacon)</label>
+          <div class="input-wrapper uuid-input">
+            <ion-icon name="bluetooth-outline"></ion-icon>
+            <input
+              type="text"
+              [(ngModel)]="formData.uuid"
+              placeholder="E.g.: A1B2C3D4-E5F6-..."
+            />
+            <button class="generate-btn" (click)="generateUUID()" title="Generate UUID">
+              <ion-icon name="refresh-outline"></ion-icon>
+            </button>
+          </div>
+          <span class="hint">The beacon UUID that the ESP will search for</span>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <ion-button fill="outline" (click)="closeForm()">
+          <ion-icon name="close-outline" slot="start"></ion-icon>
+          Cancel
+        </ion-button>
+        <ion-button (click)="showAddForm ? addDevice() : updateDevice(oldCheck,oldGate)">
+          <ion-icon name="save-outline" slot="start"></ion-icon>
+          {{ showAddForm ? 'Add' : 'Save' }}
+        </ion-button>
+      </div>
+    </div>
+  </div>
+</ion-content>

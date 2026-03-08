@@ -1,14 +1,122 @@
 import { bootstrapApplication } from '@angular/platform-browser';
-import { RouteReuseStrategy, provideRouter, withPreloading, PreloadAllModules } from '@angular/router';
-import { IonicRouteStrategy, provideIonicAngular } from '@ionic/angular/standalone';
-
-import { routes } from './app/app.routes';
+import { provideRouter } from '@angular/router';
 import { AppComponent } from './app/app.component';
+import { routes } from './app/app.routes';
+import { provideIonicAngular } from '@ionic/angular/standalone';
+import { addIcons } from 'ionicons';
+import {
+  airplane,
+  qrCode,
+  scan,
+  time,
+  shieldCheckmark,
+  notifications,
+  notificationsOutline,
+  calendarOutline,
+  timeOutline,
+  pricetagOutline,
+  locationOutline,
+  checkmarkCircle,
+  alertCircle,
+  informationCircle,
+  cafe,
+  home,
+  homeOutline,
+  people,
+  peopleOutline,
+  briefcase,
+  briefcaseOutline,
+  newspaper,
+  location,
+  bulb,
+  flash,
+  arrowForward,
+  grid,
+  restaurant,
+  leaf,
+  bag,
+  laptop,
+  star,
+  walk,
+  chevronForward,
+  fastFood,
+  compass,
+  compassOutline,
+  settings,
+  settingsOutline,
+  fingerPrint, exitOutline, locateOutline, airplaneOutline,
+  gitBranchOutline,
+  batteryFullOutline,
+  map,
+  close,
+  arrowBack,
+  wine,
+  medkit,
+  card
+} from 'ionicons/icons';
+import { defineCustomElements } from '@ionic/pwa-elements/loader';
+import {provideHttpClient} from "@angular/common/http";
+
+defineCustomElements(window);
+
+addIcons({
+  'airplane': airplane,
+  'qr-code': qrCode,
+  'scan': scan,
+  'time': time,
+  'shield-checkmark': shieldCheckmark,
+  'notifications': notifications,
+  'notifications-outline': notificationsOutline,
+  'calendar-outline': calendarOutline,
+  'time-outline': timeOutline,
+  'pricetag-outline': pricetagOutline,
+  'location-outline': locationOutline,
+  'checkmark-circle': checkmarkCircle,
+  'alert-circle': alertCircle,
+  'information-circle': informationCircle,
+  'cafe': cafe,
+  'home': home,
+  'home-outline': homeOutline,
+  'people': people,
+  'people-outline': peopleOutline,
+  'briefcase': briefcase,
+  'briefcase-outline': briefcaseOutline,
+  'newspaper': newspaper,
+  'location': location,
+  'bulb': bulb,
+  'flash': flash,
+  'arrow-forward': arrowForward,
+  'grid': grid,
+  'restaurant': restaurant,
+  'leaf': leaf,
+  'bag': bag,
+  'laptop': laptop,
+  'star': star,
+  'walk': walk,
+  'chevron-forward': chevronForward,
+  'fast-food': fastFood,
+  'compass': compass,
+  'compass-outline': compassOutline,
+  'exit-outline': exitOutline,
+  'settings': settings,
+  'settings-outline': settingsOutline,
+  'fingerprint': fingerPrint,
+  'locate': locateOutline,
+  'airplane-outline': airplaneOutline,
+  'git-branch-outline': gitBranchOutline,
+  'battery-outline': batteryFullOutline,
+  'map': map,
+  'close': close,
+  'arrow-back': arrowBack,
+  'wine': wine,
+  'medkit': medkit,
+  'card': card
+});
 
 bootstrapApplication(AppComponent, {
   providers: [
-    { provide: RouteReuseStrategy, useClass: IonicRouteStrategy },
-    provideIonicAngular(),
-    provideRouter(routes, withPreloading(PreloadAllModules)),
-  ],
+    provideRouter(routes),
+    provideIonicAngular({}),
+    provideHttpClient()
+  ]
 });

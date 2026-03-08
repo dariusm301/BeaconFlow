@@ -1,0 +1,123 @@
+<app-headboard></app-headboard>
+<ion-content class="dashboard">
+  <div class="header-gradient"></div>
+  <div class="dashboard-container">
+    <div class="header">
+      <h1>Welcome to BFlow! 👋</h1>
+    </div>
+
+    <!-- Flight card - only when ticket exists -->
+    <div class="flight-card" *ngIf="ticket">
+      <div class="flight-header">
+        <div class="flight-route">
+          <div class="airport">
+            <span class="code">{{ getAirportCode(ticket.departure_airport) }}</span>
+            <span class="city">{{ ticket.departure_airport | titlecase }}</span>
+          </div>
+          <div class="flight-path">
+            <div class="line"></div>
+            <ion-icon name="airplane" style="transform: rotate(270deg);"></ion-icon>
+            <div class="line"></div>
+          </div>
+          <div class="airport">
+            <span class="code">{{ getAirportCode(ticket.arrival_airport) }}</span>
+            <span class="city">{{ ticket.arrival_airport | titlecase }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="flight-details">
+        <div class="detail">
+          <ion-icon name="calendar-outline"></ion-icon>
+          <div>
+            <span class="label">Date</span>
+            <span class="value">March 15, 2026</span>
+          </div>
+        </div>
+        <div class="detail">
+          <ion-icon name="time-outline"></ion-icon>
+          <div>
+            <span class="label">Departure</span>
+            <span class="value">{{ ticket.departure_time }}</span>
+          </div>
+        </div>
+        <div class="detail">
+          <ion-icon name="pricetag-outline"></ion-icon>
+          <div>
+            <span class="label">Flight</span>
+            <span class="value">{{ ticket.flight_number }}</span>
+          </div>
+        </div>
+        <div class="detail">
+          <ion-icon name="location-outline"></ion-icon>
+          <div>
+            <span class="label">Gate</span>
+            <span class="value">{{ ticket.gate }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- No ticket fallback -->
+    <div class="flight-card" *ngIf="!ticket" style="text-align: center; padding: 40px 20px;">
+      <ion-icon name="airplane" style="font-size: 48px; color: #0066cc; margin-bottom: 12px;"></ion-icon>
+      <h3 style="margin: 0 0 8px; font-size: 18px; font-weight: 600;">No Boarding Pass</h3>
+      <p style="margin: 0; color: #8e8e93; font-size: 14px;">Scan your boarding pass to see flight details</p>
+    </div>
+
+    <div class="status-section">
+      <h2 class="section-title">Live Status</h2>
+
+      <div class="status-card good">
+        <div class="status-icon">
+          <ion-icon name="fingerprint"></ion-icon>
+        </div>
+        <div class="status-content">
+          <h3>Security Control</h3>
+          <p class="time">~8 minutes wait</p>
+          <div class="status-bar">
+            <div class="status-fill" style="width: 65%"></div>
+          </div>
+          <p class="status-text">Short queue, pass quickly</p>
+        </div>
+      </div>
+
+      <div class="status-card" [ngClass]="(wait?.waiting_time?.estimated_wait_minutes || 0) < 10 ? 'good' : 'warning'" >
+        <div class="status-icon">
+          <ion-icon name="airplane-outline"></ion-icon>
+        </div>
+        <div class="status-content">
+          <h3>Boarding Gate</h3>
+          <p class="time">~{{ wait?.waiting_time?.estimated_wait_minutes }} minutes wait</p>
+          <div class="status-bar">
+            <div class="status-fill" style="width: 35%"></div>
+          </div>
+          <p class="status-text">You have time for a coffee</p>
+        </div>
+      </div>
+
+
+    </div>
+
+    <div class="tips-section">
+      <h2 class="section-title">Recommendations</h2>
+      <div class="queue-card" (click)="goToQueues()">
+        <div class="status-icon">
+          <ion-icon name="people"></ion-icon>
+        </div>
+        <div class="status-content">
+          <h3>Check Queue Status</h3>
+          <p class="status-text">Monitor real-time queue times at security, passport control and boarding gate</p>
+        </div>
+        <ion-icon name="chevron-forward" class="queue-arrow"></ion-icon>
+      </div>
+      <div class="tip-card">
+        <ion-icon name="cafe"></ion-icon>
+        <div>
+          <h4>You have time for a break</h4>
+          <p>Based on current times, you have approximately 25 minutes until boarding</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</ion-content>
