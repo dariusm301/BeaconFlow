@@ -1,4 +1,4 @@
-BFlow: Intelligent Ecosystem for Predictive Passenger Flow Management
+# BFlow: Intelligent Ecosystem for Predictive Passenger Flow Management
 Turning Uncertainty into Predictability.
 
 BFlow is an end-to-end infrastructure solution that transforms physical environments into a live stream of data, anticipating bottlenecks before they impact the passenger experience.
