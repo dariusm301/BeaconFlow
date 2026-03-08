@@ -23,7 +23,8 @@ export class DashboardComponent implements OnInit {
     'ORADEA': 'OMR',
     'BUCURESTI': 'OTP',
     'CLUJ-NAPOCA': 'CLJ',
-    'PARIS': 'CDG'
+    'PARIS': 'CDG',
+    'STOCKHOLM': 'ARN',
   };
 
   getAirportCode(city: string): string {
@@ -37,24 +38,31 @@ export class DashboardComponent implements OnInit {
       const ticketData = localStorage.getItem('currentTicket');
       if (ticketData) {
         this.ticket = JSON.parse(ticketData);
-        if(this.ticket != null) {
-        this.service.getWaitingTime(this.ticket.gate.toString(), this.ticket?.flight_number).subscribe({
-          next: (response) => {
-            this.wait = response;
-            console.log('Waiting time response:', this.wait);
-          },
-          error: (err) => {
-            console.error('Error fetching waiting time:', err);
-          }
-        });
+
+        if (this.ticket != null) {
+
+          const loadWaitingTime = () => {
+            this.service.getWaitingTime(this.ticket!.gate.toString(), this.ticket!.flight_number).subscribe({
+              next: (response) => {
+                this.wait = response;
+                console.log('Waiting time response:', this.wait);
+              },
+              error: (err) => {
+                console.error('Error fetching waiting time:', err);
+              }
+            });
+          };
+
+          loadWaitingTime(); // primul request
+          setInterval(loadWaitingTime, 10000); // la fiecare 10 secunde
         }
+
         console.log('Ticket loaded:', this.ticket);
       }
     } catch (e) {
       console.error('Error parsing ticket:', e);
       this.ticket = null;
     }
-
   }
 
   goToQueues() {
