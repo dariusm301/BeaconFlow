@@ -76,13 +76,13 @@
           <h3>Security Control</h3>
           <p class="time">~8 minutes wait</p>
           <div class="status-bar">
-            <div class="status-fill" style="width: 30%"></div>
+            <div class="status-fill" style="width: 65%"></div>
           </div>
           <p class="status-text">Short queue, pass quickly</p>
         </div>
       </div>
 
-      <div class="status-card warning">
+      <div class="status-card" [ngClass]="(wait?.waiting_time?.estimated_wait_minutes || 0) < 10 ? 'good' : 'warning'" >
         <div class="status-icon">
           <ion-icon name="airplane-outline"></ion-icon>
         </div>
@@ -90,7 +90,7 @@
           <h3>Boarding Gate</h3>
           <p class="time">~{{ wait?.waiting_time?.estimated_wait_minutes }} minutes wait</p>
           <div class="status-bar">
-            <div class="status-fill" style="width: 65%"></div>
+            <div class="status-fill" style="width: 35%"></div>
           </div>
           <p class="status-text">You have time for a coffee</p>
         </div>

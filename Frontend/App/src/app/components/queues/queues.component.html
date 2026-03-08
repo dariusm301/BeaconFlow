@@ -51,17 +51,17 @@
             <div class="stop-time good-text">~5 min</div>
           </div>
 
-          <div class="route-line warning-line"></div>
+          <div class="route-line" [ngClass]="(wait?.waiting_time?.estimated_wait_minutes || 0) < 10 ? 'good-line' : 'warning-line'"></div>
 
           <!-- Gate -->
           <div class="route-stop">
             <div class="stop-top">
-              <div class="stop-dot warning-dot">
+              <div class="stop-dot" [ngClass]="(wait?.waiting_time?.estimated_wait_minutes || 0) < 10 ? 'good-dot' : 'warning-dot'" >
                 <ion-icon name="airplane"></ion-icon>
               </div>
             </div>
             <div class="stop-label">Gate {{ ticket?.gate }}</div>
-            <div class="stop-time warning-text">~{{ wait?.waiting_time?.estimated_wait_minutes }} min</div>
+            <div class="stop-time" [ngClass]="(wait?.waiting_time?.estimated_wait_minutes || 0) < 10 ? 'good-text' : 'warning-text'">~{{ wait?.waiting_time?.estimated_wait_minutes }} min</div>
           </div>
         </div>
       </div>
@@ -147,13 +147,14 @@
           Very fast passage
         </p>
       </div>
-      <div class="queue-card warning">
+      <div class="queue-card"  [ngClass]="(wait?.waiting_time?.estimated_wait_minutes || 0) < 10 ? 'good' : 'warning'">
         <div class="queue-header">
           <div class="queue-title">
             <ion-icon name="airplane"></ion-icon>
             <h3>Gate {{ ticket?.gate }}</h3>
           </div>
-          <div class="queue-badge warning">Moderate</div>
+          <div class="queue-badge warning" *ngIf="(wait?.waiting_time?.estimated_wait_minutes || 0) > 10">Moderate</div>
+          <div class="queue-badge good" *ngIf="(wait?.waiting_time?.estimated_wait_minutes || 0) < 10">Clear</div>
         </div>
 
         <div class="queue-stats">
